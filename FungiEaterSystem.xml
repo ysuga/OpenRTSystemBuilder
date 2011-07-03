@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rts:RtsProfile rts:updateDate="2011-06-26T08:26:26.727+09:00" rts:creationDate="2011-06-26T08:26:26.683+09:00" rts:version="0.2" rts:id="RTSystem:FungiEaterSystem:FungiEaterSystem:1.0" xmlns:rtsExt="http://www.openrtp.org/namespaces/rts_ext" xmlns:rts="http://www.openrtp.org/namespaces/rts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <rts:Components xsi:type="rtsExt:component_ext" rts:isRequired="true" rts:compositeType="None" rts:activeConfigurationSet="default" rts:instanceName="VehicleSim0" rts:pathUri="127.0.0.1/VehicleSim0.rtc" rts:id="RTC:ysuga.net:Category:VehicleSim:1.0.0">
+        <rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name=".fungi"/>
+        <rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name=".ore"/>
+        <rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name=".battery"/>
+        <rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name=".vr"/>
+        <rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name=".vl"/>
+        <rts:ConfigurationSets rts:id="default">
+            <rts:ConfigurationData rts:data="1.0" rts:name="speed"/>
+            <rts:ConfigurationData rts:data="0.005" rts:name="consumption"/>
+            <rts:ConfigurationData rts:data="0.1" rts:name="fungi_energy"/>
+            <rts:ConfigurationData rts:data="0.001" rts:name="error_rate"/>
+        </rts:ConfigurationSets>
+        <rts:ExecutionContexts xsi:type="rtsExt:execution_context_ext" rts:rate="100.0" rts:kind="PERIODIC" rts:id="0"/>
+        <rtsExt:Location rtsExt:direction="RIGHT" rtsExt:width="-1" rtsExt:height="-1" rtsExt:y="217" rtsExt:x="222"/>
+        <rtsExt:Properties rtsExt:value="IOR:000000000000003549444c3a6f70656e72746d2e616973742e676f2e6a702f4f70656e52544d2f44617461466c6f77436f6d706f6e656e743a312e3000000000000000010000000000000086000102000000000e3139322e3136382e3233372e3100c19600000031afabcb0000000020c91eb51700000001000000000000000100000008526f6f74504f410000000008000000130000000014000000000000020000000100000020000000000001000100000002050100010001002000010109000000010001010000000026000000020002" rtsExt:name="IOR"/>
+    </rts:Components>
+    <rts:Components xsi:type="rtsExt:component_ext" rts:isRequired="true" rts:compositeType="None" rts:activeConfigurationSet="default" rts:instanceName="FungusEater0" rts:pathUri="127.0.0.1/FungusEater0.rtc" rts:id="RTC:ysuga.net:Test:FungusEater:1.0.0">
+        <rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name=".vr"/>
+        <rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name=".vl"/>
+        <rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name=".in"/>
+        <rts:ConfigurationSets rts:id="default"/>
+        <rts:ExecutionContexts xsi:type="rtsExt:execution_context_ext" rts:rate="100.0" rts:kind="PERIODIC" rts:id="0"/>
+        <rtsExt:Location rtsExt:direction="RIGHT" rtsExt:width="-1" rtsExt:height="-1" rtsExt:y="85" rtsExt:x="82"/>
+        <rtsExt:Properties rtsExt:value="IOR:000000000000003549444c3a6f70656e72746d2e616973742e676f2e6a702f4f70656e52544d2f44617461466c6f77436f6d706f6e656e743a312e3000000000000000010000000000000086000102000000000e3139322e3136382e3233372e3100c19600000031afabcb0000000020c91eb51700000001000000000000000100000008526f6f74504f410000000008000000050000000014000000000000020000000100000020000000000001000100000002050100010001002000010109000000010001010000000026000000020002" rtsExt:name="IOR"/>
+    </rts:Components>
+    <rts:Components xsi:type="rtsExt:component_ext" rts:isRequired="true" rts:compositeType="None" rts:activeConfigurationSet="default" rts:instanceName="FloatLessThan0" rts:pathUri="127.0.0.1/FloatLessThan0.rtc" rts:id="RTC:ysuga.net:Test:FloatLessThan:1.0.0">
+        <rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name=".in"/>
+        <rts:ConfigurationSets rts:id="default">
+            <rts:ConfigurationData rts:data="0.6" rts:name="threshold"/>
+        </rts:ConfigurationSets>
+        <rts:ExecutionContexts xsi:type="rtsExt:execution_context_ext" rts:rate="100.0" rts:kind="PERIODIC" rts:id="0"/>
+        <rtsExt:Location rtsExt:direction="RIGHT" rtsExt:width="-1" rtsExt:height="-1" rtsExt:y="282" rtsExt:x="351"/>
+        <rtsExt:Properties rtsExt:value="IOR:000000000000003549444c3a6f70656e72746d2e616973742e676f2e6a702f4f70656e52544d2f44617461466c6f77436f6d706f6e656e743a312e3000000000000000010000000000000086000102000000000e3139322e3136382e3233372e3100c19600000031afabcb0000000020c91eb51700000001000000000000000100000008526f6f74504f4100000000080000000f0000000014000000000000020000000100000020000000000001000100000002050100010001002000010109000000010001010000000026000000020002" rtsExt:name="IOR"/>
+    </rts:Components>
+    <rts:DataPortConnectors xsi:type="rtsExt:dataport_connector_ext" rts:subscriptionType="new" rts:dataflowType="push" rts:interfaceType="corba_cdr" rts:dataType="TimedFloatSeq" rts:name=".fungi_.in" rts:connectorId="d221e872-745d-4b83-bbf5-9a959f4e84bc">
+        <rts:sourceDataPort xsi:type="rtsExt:target_port_ext" rts:portName=".fungi" rts:instanceName="VehicleSim0" rts:componentId="RTC:ysuga.net:Category:VehicleSim:1.0.0">
+            <rtsExt:Properties rtsExt:value="127.0.0.1/VehicleSim0.rtc" rtsExt:name="COMPONENT_PATH_ID"/>
+        </rts:sourceDataPort>
+        <rts:targetDataPort xsi:type="rtsExt:target_port_ext" rts:portName=".in" rts:instanceName="FungusEater0" rts:componentId="RTC:ysuga.net:Test:FungusEater:1.0.0">
+            <rtsExt:Properties rtsExt:value="127.0.0.1/FungusEater0.rtc" rtsExt:name="COMPONENT_PATH_ID"/>
+        </rts:targetDataPort>
+    </rts:DataPortConnectors>
+    <rts:DataPortConnectors xsi:type="rtsExt:dataport_connector_ext" rts:subscriptionType="new" rts:dataflowType="push" rts:interfaceType="corba_cdr" rts:dataType="TimedFloat" rts:name=".battery_.in" rts:connectorId="21edcbc0-2bca-49a1-9122-e9614fd98fc0">
+        <rts:sourceDataPort xsi:type="rtsExt:target_port_ext" rts:portName=".battery" rts:instanceName="VehicleSim0" rts:componentId="RTC:ysuga.net:Category:VehicleSim:1.0.0">
+            <rtsExt:Properties rtsExt:value="127.0.0.1/VehicleSim0.rtc" rtsExt:name="COMPONENT_PATH_ID"/>
+        </rts:sourceDataPort>
+        <rts:targetDataPort xsi:type="rtsExt:target_port_ext" rts:portName=".in" rts:instanceName="FloatLessThan0" rts:componentId="RTC:ysuga.net:Test:FloatLessThan:1.0.0">
+            <rtsExt:Properties rtsExt:value="127.0.0.1/FloatLessThan0.rtc" rtsExt:name="COMPONENT_PATH_ID"/>
+        </rts:targetDataPort>
+    </rts:DataPortConnectors>
+    <rts:DataPortConnectors xsi:type="rtsExt:dataport_connector_ext" rts:subscriptionType="new" rts:dataflowType="push" rts:interfaceType="corba_cdr" rts:dataType="TimedFloat" rts:name=".vr_.vr" rts:connectorId="b11091cf-dcce-42fe-920b-4063eebaf645">
+        <rts:sourceDataPort xsi:type="rtsExt:target_port_ext" rts:portName=".vr" rts:instanceName="VehicleSim0" rts:componentId="RTC:ysuga.net:Category:VehicleSim:1.0.0">
+            <rtsExt:Properties rtsExt:value="127.0.0.1/VehicleSim0.rtc" rtsExt:name="COMPONENT_PATH_ID"/>
+        </rts:sourceDataPort>
+        <rts:targetDataPort xsi:type="rtsExt:target_port_ext" rts:portName=".vr" rts:instanceName="FungusEater0" rts:componentId="RTC:ysuga.net:Test:FungusEater:1.0.0">
+            <rtsExt:Properties rtsExt:value="127.0.0.1/FungusEater0.rtc" rtsExt:name="COMPONENT_PATH_ID"/>
+        </rts:targetDataPort>
+    </rts:DataPortConnectors>
+    <rts:DataPortConnectors xsi:type="rtsExt:dataport_connector_ext" rts:subscriptionType="new" rts:dataflowType="push" rts:interfaceType="corba_cdr" rts:dataType="TimedFloat" rts:name=".vl_.vl" rts:connectorId="5b410f9f-4f87-4c38-8732-b74ac2c34103">
+        <rts:sourceDataPort xsi:type="rtsExt:target_port_ext" rts:portName=".vl" rts:instanceName="FungusEater0" rts:componentId="RTC:ysuga.net:Test:FungusEater:1.0.0">
+            <rtsExt:Properties rtsExt:value="127.0.0.1/FungusEater0.rtc" rtsExt:name="COMPONENT_PATH_ID"/>
+        </rts:sourceDataPort>
+        <rts:targetDataPort xsi:type="rtsExt:target_port_ext" rts:portName=".vl" rts:instanceName="VehicleSim0" rts:componentId="RTC:ysuga.net:Category:VehicleSim:1.0.0">
+            <rtsExt:Properties rtsExt:value="127.0.0.1/VehicleSim0.rtc" rtsExt:name="COMPONENT_PATH_ID"/>
+        </rts:targetDataPort>
+    </rts:DataPortConnectors>
+</rts:RtsProfile>
+
