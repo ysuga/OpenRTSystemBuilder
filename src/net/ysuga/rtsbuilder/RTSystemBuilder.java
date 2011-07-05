@@ -2,6 +2,7 @@ package net.ysuga.rtsbuilder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
@@ -18,6 +19,11 @@ import net.ysuga.rtsystem.profile.ExecutionContext;
 import net.ysuga.rtsystem.profile.Location;
 import net.ysuga.rtsystem.profile.Properties;
 import net.ysuga.rtsystem.profile.RTSystemProfile;
+
+import org.omg.CORBA.AnyHolder;
+
+import com.sun.xml.internal.bind.v2.util.TypeCast;
+
 import OpenRTM.DataFlowComponent;
 import RTC.ComponentProfile;
 import RTC.ConnectorProfile;
@@ -49,7 +55,7 @@ public class RTSystemBuilder {
 
 	static public boolean searchRTCs(RTSystemProfile rtSystemProfile) {
 		boolean ret = false;
-		for(Component component: rtSystemProfile.componentMap().values()) {
+		for(Component component: rtSystemProfile.componentSet) {
 			try {
 				findComponent(component);
 			} catch (Exception e) {
@@ -64,14 +70,14 @@ public class RTSystemBuilder {
 	 */
 	static public void buildRTSystem(RTSystemProfile rtSystemProfile) {
 		logger.info("buildRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Component component: rtSystemProfile.componentMap().values()) {
+		for(Component component: rtSystemProfile.componentSet) {
 			try {
 				configureComponent(component);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		for(Connector connector : rtSystemProfile.connectorMap().values()) {
+		for(Connector connector : rtSystemProfile.connectorSet) {
 			try {
 				connect(connector);
 		 	} catch (Exception e) {
@@ -109,7 +115,7 @@ public class RTSystemBuilder {
 
 	static public void destroyRTSystem(RTSystemProfile rtSystemProfile) {
 		logger.info("destroyRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Connector connector : rtSystemProfile.connectorMap().values()) {
+		for(Connector connector : rtSystemProfile.connectorSet) {
 			try {
 				disconnect(connector);
 		 	} catch (Exception e) {
@@ -193,7 +199,7 @@ public class RTSystemBuilder {
 	 */
 	static public void activateRTCs(RTSystemProfile rtSystemProfile) throws Exception {
 		logger.info("activateRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Component component: rtSystemProfile.componentMap().values()) {
+		for(Component component: rtSystemProfile.componentSet) {
 			activateComponent(component);
 		}
 	}
@@ -204,7 +210,7 @@ public class RTSystemBuilder {
 	 */
 	static public void deactivateRTCs(RTSystemProfile rtSystemProfile) throws Exception {
 		logger.info("deactivateRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Component component: rtSystemProfile.componentMap().values()) {
+		for(Component component: rtSystemProfile.componentSet) {
 			deactivateComponent(component);
 		}
 	}
@@ -215,11 +221,24 @@ public class RTSystemBuilder {
 	 */
 	static public void resetRTCs(RTSystemProfile rtSystemProfile) throws Exception {
 		logger.info("resetRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Component component: rtSystemProfile.componentMap().values()) {
+		for(Component component: rtSystemProfile.componentSet) {
 			resetComponent(component);
 		}
 	}
+	
+	static public String buildComponentId(RTC.RTObject rtObject) {
+		ComponentProfile profile;
+		profile = rtObject.get_component_profile();
+		return "RTC:" + profile.vendor + ":" + profile.category + ":" 
+		 + profile.type_name + ":" + profile.version;
+	}
 
+	/**
+	 * 
+	 * @param pathUri
+	 * @return
+	 * @throws Exception
+	 */
 	static public Component createComponent(String pathUri) throws Exception {
 		RTObject rtObject = findComponent(pathUri);
 		ComponentProfile profile;
@@ -229,13 +248,31 @@ public class RTSystemBuilder {
 		} catch (Exception ex) {
 			return null;
 		}
+		
+		
 		Component component =  new Component(profile.instance_name, 
 				pathUri,
-				"RTC:" + profile.vendor + ":" + profile.category + ":" 
-				 + profile.type_name + ":" + profile.version,
+				buildComponentId(rtObject),
 				rtObject.get_configuration().get_active_configuration_set().id,
 				false,
 				"None");
+		
+		PortService[] portServices = rtObject.get_ports();
+		for(PortService portService : portServices) {
+			String name = portService.get_port_profile().name;
+			/*
+			NameValue[] nvs = portService.get_port_profile().properties;
+			String dataType = "";
+			for(NameValue nv : nvs) {
+				if(nv.name.equals("dataport.data_type")) {
+					dataType = nv.value.extract_wstring();
+				}
+			}
+			*/
+			Component.DataPort dataPort = component.new DataPort(name);
+			component.dataPortSet.add(dataPort);
+		}
+		
 		
 		// Adding Configuration Sets
 		_SDOPackage.Configuration configuration = rtObject.get_configuration();
@@ -270,8 +307,68 @@ public class RTSystemBuilder {
 		return component;
 	}
 	
+	/**
+	 * 
+	 * @param connectorProfile
+	 * @return
+	 * @throws Exception 
+	 */
+	static protected Connector createConnector(Set<Component> componentSet, ConnectorProfile connectorProfile) throws Exception {
+		String connectorId, name, dataType = "";
+		String interfaceType = "", dataflowType = "", subscriptionType = "";
+		connectorId = connectorProfile.connector_id;
+		name = connectorProfile.name;
+		for(_SDOPackage.NameValue nameValue : connectorProfile.properties) {
+			if(nameValue.name.equals("dataport.data_type")) {
+				dataType = nameValue.value.extract_string();
+			} else if(nameValue.name.equals("dataport.dataflow_type")) {
+				dataflowType = nameValue.value.extract_string();
+			} else if(nameValue.name.equals("dataport.subscription_type")) {
+				subscriptionType = nameValue.value.extract_string();
+			} else if(nameValue.name.equals("dataport.interface_type")) {
+				interfaceType = nameValue.value.extract_string();
+			}
+		}
+		
+		Connector connector = new Connector(connectorId, name, 
+				dataType, interfaceType, dataflowType, subscriptionType);
+	
+		String sourcePathUri = null, targetPathUri = null;
+		RTObject sourceRTC = connectorProfile.ports[0].get_port_profile().owner;
+		RTObject targetRTC = connectorProfile.ports[1].get_port_profile().owner;
+		for(Component component : componentSet) {
+			if(findComponent(component).equals(sourceRTC)) {
+				sourcePathUri = component.get(Component.PATH_URI);
+			}
+		}
+		for(Component component : componentSet) {
+			if(findComponent(component).equals(targetRTC)) {
+				targetPathUri = component.get(Component.PATH_URI);
+			}
+		
+		}
+		if(sourcePathUri == null || targetPathUri == null) {
+			throw new Exception();
+		}
+		
+		connector.sourceDataPort = connector.new DataPort(
+				connectorProfile.ports[0].get_port_profile().name,
+				connectorProfile.ports[0].get_port_profile().owner.get_component_profile().instance_name,
+				RTSystemBuilder.buildComponentId(connectorProfile.ports[0].get_port_profile().owner));
+		connector.sourceDataPort.properties = new Properties("COMPONENT_PATH_ID", sourcePathUri);
+
+		connector.targetDataPort = connector.new DataPort(
+				connectorProfile.ports[1].get_port_profile().name,
+				connectorProfile.ports[1].get_port_profile().owner.get_component_profile().instance_name,
+				RTSystemBuilder.buildComponentId(connectorProfile.ports[1].get_port_profile().owner));					
+		connector.targetDataPort.properties = new Properties("COMPONENT_PATH_ID", targetPathUri);
+		
+	
+		return connector;
+	}
 	
 	static public RTC.RTObject findComponent(String pathUri) throws Exception {
+		logger.info("findComponent:" + pathUri);
 		StringTokenizer tokenizer = new StringTokenizer(pathUri, "/");
 		String namingURI = tokenizer.nextToken();
 		String compURI = pathUri.substring(
@@ -305,7 +402,6 @@ public class RTSystemBuilder {
 	 * @throws Exception
 	 */
 	static public RTC.RTObject findComponent(Component component) throws Exception {
-		logger.info("searchComponent:" + component.get(Component.INSTANCE_NAME));
 		return findComponent(component.get(Component.PATH_URI));
 	}
 

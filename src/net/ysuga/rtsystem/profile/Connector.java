@@ -28,6 +28,12 @@ public class Connector extends RTSProperties {
 	 */
 	public static final String SUBSCRIPTION_TYPE = "rts:subscriptionType";
 
+
+	/**
+	 * 
+	 */
+	public static final String TYPE = "xsi:type";
+	
 	/**
 	 * 
 	 */
@@ -99,12 +105,12 @@ public class Connector extends RTSProperties {
 		/**
 		 * Constructor
 		 */
-		public DataPort() {
+		public DataPort(String portName, String instanceName, String componentId) {
 			super();
-			put(INSTANCE_NAME, "defaultInstanceName");
-			put(PORT_NAME, "defaultPortName");
-			put(TYPE, "defaultType");
-			put(COMPONENT_ID, "defaultComponentId");
+			put(INSTANCE_NAME, instanceName );
+			put(PORT_NAME, portName);
+			put(TYPE, "rtsExt:target_port_ext");
+			put(COMPONENT_ID, componentId);
 		}
 
 
@@ -113,7 +119,7 @@ public class Connector extends RTSProperties {
 		 * @param node XML node.
 		 */
 		public DataPort(Node node) throws IOException {
-			this();
+			this("defaultPortName", "defaultInstanceName", "defaultComponentId");
 			load(node);
 			
 			NodeList nodeList = node.getChildNodes();
@@ -141,16 +147,24 @@ public class Connector extends RTSProperties {
 	/**
 	 * Constructor
 	 */
-	public Connector() {
+	public Connector(String connectorId, String name, 
+			String dataType, String interfaceType, 
+			String dataflowType, String subscriptionType) {
 		super();
-		put(INTERFACE_TYPE, "defaultInterfaceType");
-		put(DATAFLOW_TYPE, "defaultDataflowType");
-		put(SUBSCRIPTION_TYPE, "defaultSubscriptionType");
-		put(NAME, "defaultName");
-		put(CONNECTOR_ID, "defaultConnectorId");
-		put(DATA_TYPE, "defaultDataType");
+		put(INTERFACE_TYPE, interfaceType);
+		put(DATAFLOW_TYPE, dataflowType);
+		put(SUBSCRIPTION_TYPE, subscriptionType);
+		put(NAME, name);
+		put(TYPE, "rtsExt:dataport_connector_ext");
+		put(CONNECTOR_ID, connectorId);
+		put(DATA_TYPE, dataType);
 	}
 
+	public Connector() throws IOException {
+		this("defaultConnectorId", "defaultName",
+				"defaultDataType", "defaultInterfaceType",
+				"defaultDataflowType", "defaultSubscriptionType");
+	}
 	/**
 	 * Constructor
 	 * @param node XML node.
@@ -184,7 +198,7 @@ public class Connector extends RTSProperties {
 		Element element = createElement(elementName, document);
 		element.appendChild(sourceDataPort.getElement("rts:sourceDataPort", document));
 		element.appendChild(targetDataPort.getElement("rts:targetDataPort", document));
-		return null;
+		return element;
 	}
 
 	

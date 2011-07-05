@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -45,36 +47,20 @@ public class RTSystemProfile extends RTSProperties {
 		return fileName;
 	}
 
-	private Map<String, Component> componentMap;
+	public Set<Component> componentSet;
 
-	private Map<String, Connector> connectorMap;
-
-	/**
-	 * 
-	 * @return
-	 */
-	final public Map<String, Component> componentMap() {
-		return componentMap;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	final public Map<String, Connector> connectorMap() {
-		return connectorMap;
-	}
+	public Set<Connector> connectorSet;
 
 	protected String formatCalendar(Calendar calendar) {
 		MessageFormat mf = new MessageFormat(
-				"{0,date,yyyy-MM-dd}{1,choice,0#M|1#E|2#W|3#T|4#F|5#A|6#S}{0,date,HH:mm:ss.SSSZ}");
-		Object[] objs = { calendar.getTime(), calendar.get(Calendar.DAY_OF_WEEK)};
-		return mf.format(objs);
+				"{0,date,yyyy-MM-dd}T{0,date,HH:mm:ss.SSSZ}");
+		Object[] objs = { calendar.getTime()};
+		StringBuffer buf = new StringBuffer(mf.format(objs));
+		buf.insert(buf.length()-2, ":");
+		return buf.toString();
 	}
 
-	public RTSystemProfile() {
-		componentMap = new HashMap<String, Component>();
-		connectorMap = new HashMap<String, Connector>();
+	public RTSystemProfile(String systemName, String vendorName, String version) {
 		put("xmlns:rtsExt", "http://www.openrtp.org/namespaces/rts_ext");
 		put("xmlns:rts", "http://www.openrtp.org/namespaces/rts");
 		put("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -82,7 +68,9 @@ public class RTSystemProfile extends RTSProperties {
 		put("rts:updateDate", formatCalendar(current));
 		put("rts:creationDate", formatCalendar(current));
 		put(VERSION, "0.2");
-		put(ID, "defaultId");
+		put(ID, "RTSystem:" + vendorName + ":" + systemName + ":" + version);
+		componentSet = new HashSet<Component>();
+		connectorSet = new HashSet<Connector>();
 	}
 
 	@Override
@@ -95,11 +83,11 @@ public class RTSystemProfile extends RTSProperties {
 	 */
 	public Element getElement(String elementName, Document document) {
 		Element element = createElement(elementName, document);
-		for (Component component : componentMap.values()) {
+		for (Component component : componentSet) {
 			element.appendChild(component
 					.getElement("rts:Components", document));
 		}
-		for (Connector connector : connectorMap.values()) {
+		for (Connector connector : connectorSet) {
 			element.appendChild(connector.getElement("rts:DataPortConnectors",
 					document));
 		}
@@ -108,7 +96,7 @@ public class RTSystemProfile extends RTSProperties {
 
 	public RTSystemProfile(File file) throws ParserConfigurationException,
 			SAXException, IOException {
-		this();
+		this("defaultName", "defaultVendorName", "defaultVersion");
 		load(file);
 	}
 
@@ -175,7 +163,7 @@ public class RTSystemProfile extends RTSProperties {
 	 * @param component
 	 */
 	public void addComponent(Component component) {
-		componentMap.put(component.get("rts:instanceName"), component);
+		componentSet.add(component);
 	}
 
 	/**
@@ -183,16 +171,16 @@ public class RTSystemProfile extends RTSProperties {
 	 * @param connector
 	 */
 	public void addConnector(Connector connector) {
-		connectorMap.put(connector.get("rts:name"), connector);
+		connectorSet.add(connector);
 	}
 
 	public void removeComponent(Component component) {
-		componentMap.remove(component.get("rts:instanceName"));
+		componentSet.remove(component.get("rts:instanceName"));
 
 	}
 
 	public void removeConnector(Connector connector) {
-		connectorMap.remove(connector.get("rts:name"));
+		connectorSet.remove(connector.get("rts:name"));
 	}
 
 	/**
@@ -201,7 +189,12 @@ public class RTSystemProfile extends RTSProperties {
 	 * @return
 	 */
 	final public Component getComponent(String name) {
-		return componentMap.get(name);
+		for(Component component : componentSet) {
+			if(component.get(Component.INSTANCE_NAME).equals(name)){
+				return component;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -210,7 +203,12 @@ public class RTSystemProfile extends RTSProperties {
 	 * @return
 	 */
 	final public Connector getConnector(String name) {
-		return connectorMap.get(name);
+		for(Connector connector : connectorSet) {
+			if(connector.get(Connector.CONNECTOR_ID).equals(name)){
+				return connector;
+			}
+		}
+		return null;
 	}
 
 }

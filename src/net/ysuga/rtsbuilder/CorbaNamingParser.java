@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 import jp.go.aist.rtm.RTC.CorbaNaming;
 import jp.go.aist.rtm.RTC.util.ORBUtil;
 import net.ysuga.rtsystem.profile.Component;
+import net.ysuga.rtsystem.profile.Connector;
 
 import org.omg.CosNaming.Binding;
 import org.omg.CosNaming.BindingIteratorHolder;
@@ -40,6 +41,11 @@ public class CorbaNamingParser {
 		this.hostAddress = hostAddress;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public Set<String> getRTObjectPathUriSet() throws Exception {
 		Set<String> pathUriSet = new HashSet<String>();
 		BindingListHolder bl = new BindingListHolder();
@@ -69,6 +75,12 @@ public class CorbaNamingParser {
 		return pathUriSet;
 	}
 	
+	/**
+	 * 
+	 * @param namingContext
+	 * @return
+	 * @throws Exception
+	 */
 	protected Set<String> getRTObjectPathUriSetSub(NamingContext namingContext) throws Exception {
 		Set<String> pathUriSet = new HashSet<String>();
 		BindingListHolder bl = new BindingListHolder();
@@ -90,6 +102,11 @@ public class CorbaNamingParser {
 		return pathUriSet;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public Set<Component> getRegisteredComponentSet() throws Exception {
 		Set<Component> componentSet = new HashSet<Component>();
 		Set<String> componentUriSet = getRTObjectPathUriSet();
@@ -108,6 +125,30 @@ public class CorbaNamingParser {
 		}
 		
 		return componentSet;
+	}
+	
+	/**
+	 * éQâ¡ÇµÇƒÇ¢ÇÈRTCä‘ÇÃê⁄ë±ÇÃÇ›ÇèoóÕ
+	 * 
+	 * @param componentSet
+	 * @return
+	 * @throws Exception
+	 */
+	public Set<Connector> getConnectorSet(Set<Component> componentSet) throws Exception {
+		Set<Connector> connectorSet = new HashSet<Connector>();
+		
+		for(Component component : componentSet) {
+			RTObject sourceRTObject = RTSystemBuilder.findComponent(component);
+			
+			RTC.PortService[] portServices = sourceRTObject.get_ports();
+			for(RTC.PortService portService : portServices) {
+				RTC.ConnectorProfile[] connectorProfiles = portService.get_connector_profiles();
+				for(RTC.ConnectorProfile connectorProfile : connectorProfiles) {
+					connectorSet.add(RTSystemBuilder.createConnector(componentSet, connectorProfile));
+				}
+			}
+		}
+		return connectorSet;
 	}
 	
 }

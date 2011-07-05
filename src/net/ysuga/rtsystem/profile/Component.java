@@ -30,6 +30,7 @@ public class Component extends RTSProperties {
 	 */
 	public static final String ID = "rts:id";
 
+	public static final String TYPE = "xsi:type";
 	/**
 	 * 
 	 */
@@ -84,7 +85,7 @@ public class Component extends RTSProperties {
 	 * @author ysuga
 	 *
 	 */
-	class DataPort extends RTSProperties {
+	public class DataPort extends RTSProperties {
 		/**
 		 * 
 		 */
@@ -93,9 +94,9 @@ public class Component extends RTSProperties {
 		/**
 		 * Constructor
 		 */
-		public DataPort() {
-			put("xsi:type", "defaultType");
-			put("rts:name", "defaultName");
+		public DataPort(String name) {
+			put("xsi:type", "rtsExt:dataport_ext");
+			put("rts:name", name);
 		}
 		
 		/**
@@ -104,7 +105,7 @@ public class Component extends RTSProperties {
 		 * @throws IOException
 		 */
 		public DataPort(Node node) throws IOException {
-			this();
+			this("defaultName");
 			load(node);
 		}
 
@@ -132,6 +133,7 @@ public class Component extends RTSProperties {
 			String Id, String activeConfigurationSet, 
 			boolean required, String compositeType) throws IOException {
 		super();
+		put(TYPE, "rtsExt:component_ext");
 		put(IS_REQUIRED, Boolean.toString(required));
 		put(COMPOSITE_TYPE, compositeType);
 		put(ACTIVE_CONFIGURATION_SET, activeConfigurationSet);
@@ -165,7 +167,7 @@ public class Component extends RTSProperties {
 				configurationSetSet.add(new ConfigurationSet(cnode));
 			} else if (cnode.getNodeName().equals("rts:ExecutionContexts")) {
 				executionContextSet.add(new ExecutionContext(cnode));
-			} else if (cnode.getNodeName().equals("rts:Location")) {
+			} else if (cnode.getNodeName().equals("rtsExt:Location")) {
 				location = new Location(cnode);
 			} else if (cnode.getNodeName().equals("rtsExt:Properties")) {
 				properties = new Properties(cnode);
@@ -194,7 +196,7 @@ public class Component extends RTSProperties {
 			element.appendChild(executionContext.getElement("rts:ExecutionContexts", document));
 		}
 		
-		element.appendChild(location.getElement("rts:Location", document));
+		element.appendChild(location.getElement("rtsExt:Location", document));
 		element.appendChild(properties.getElement("rtsExt:Properties", document));
 		
 		return element;
