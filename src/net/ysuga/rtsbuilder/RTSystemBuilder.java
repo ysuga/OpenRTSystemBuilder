@@ -1,3 +1,5 @@
+
+
 package net.ysuga.rtsbuilder;
 
 import java.util.HashMap;
@@ -19,11 +21,6 @@ import net.ysuga.rtsystem.profile.ExecutionContext;
 import net.ysuga.rtsystem.profile.Location;
 import net.ysuga.rtsystem.profile.Properties;
 import net.ysuga.rtsystem.profile.RTSystemProfile;
-
-import org.omg.CORBA.AnyHolder;
-
-import com.sun.xml.internal.bind.v2.util.TypeCast;
-
 import OpenRTM.DataFlowComponent;
 import RTC.ComponentProfile;
 import RTC.ConnectorProfile;
@@ -35,6 +32,22 @@ import RTC.RTObject;
 import _SDOPackage.NVListHolder;
 import _SDOPackage.NameValue;
 
+/**
+ * @author ysuga
+ *
+ */
+/**
+ * @author ysuga
+ *
+ */
+/**
+ * @author ysuga
+ *
+ */
+/**
+ * @author ysuga
+ *
+ */
 public class RTSystemBuilder {
 	static private Logger logger;
 	
@@ -45,14 +58,33 @@ public class RTSystemBuilder {
 		corbaNamingMap = new HashMap<String, CorbaNaming>();
 	}
 	
+
+
 	/**
-	 * Constructor
 	 * 
-	 * @param rtSystemProfile
+	 * <div lang="ja">
+	 * コンストラクタ
+	 * </div>
+	 * <div lang="en">
+	 * Constructor
+	 * </div>
 	 */
 	public RTSystemBuilder() {
+		
 	}	
 
+
+	/**
+	 * <div lang="ja">
+	 * プロファイル内のRTコンポーネントの存在確認
+	 * @param rtSystemProfile 
+	 * @return すべて存在ならtrue
+	 * </div>
+	 * <div lang="en">
+	 * @param rtSystemProfile
+	 * @return
+	 * </div>
+	 */
 	static public boolean searchRTCs(RTSystemProfile rtSystemProfile) {
 		boolean ret = false;
 		for(Component component: rtSystemProfile.componentSet) {
@@ -65,8 +97,16 @@ public class RTSystemBuilder {
 		return ret;
 	}
 		
+
 	/**
 	 * 
+	 * <div lang="ja">
+	 * RTシステムの構築
+	 * @param rtSystemProfile
+	 * </div>
+	 * <div lang="en">
+	 * @param rtSystemProfile
+	 * </div>
 	 */
 	static public void buildRTSystem(RTSystemProfile rtSystemProfile) {
 		logger.info("buildRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
@@ -86,9 +126,19 @@ public class RTSystemBuilder {
 		}
 	}
 
+
+
 	/**
+	 * 
+	 * <div lang="ja">
+	 * RTコンポーネントのコンフィグレーション
 	 * @param component
-	 * @throws Exception 
+	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 * @param component
+	 * @throws Exception
+	 * </div>
 	 */
 	static public void configureComponent(Component component) throws Exception {
 		logger.info("configureComponent:" + component.get(Component.INSTANCE_NAME));
@@ -113,6 +163,17 @@ public class RTSystemBuilder {
 	}
 
 
+	/**
+	 * 
+	 * <div lang="ja">
+	 * RTシステムの破壊．プロファイルに登録されているすべての接続を解除
+	 * @param rtSystemProfile
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param rtSystemProfile
+	 * </div>
+	 */
 	static public void destroyRTSystem(RTSystemProfile rtSystemProfile) {
 		logger.info("destroyRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
 		for(Connector connector : rtSystemProfile.connectorSet) {
@@ -124,10 +185,62 @@ public class RTSystemBuilder {
 		}
 	}
 
-	static public void clearAllConnection() {
-
+	/**
+	 * 
+	 * <div lang="ja">
+	 * プロファイルに登録されているすべてのRTコンポーネントの持つポートのコネクションを削除
+	 * @param rtSystemProfile
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param rtSystemProfile
+	 * </div>
+	 */
+	static public void clearAllConnection(RTSystemProfile rtSystemProfile) {
+		logger.info("clearAllConnection:" + rtSystemProfile.get(RTSystemProfile.ID));
+		for(Component component: rtSystemProfile.componentSet) {
+			try {
+				clearAllConnection(component);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
+
+	/**
+	 * 
+	 * <div lang="ja">
+	 * コンポーネントのすべての接続を削除
+	 * @param component
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param component
+	 * </div>
+	 * @throws Exception 
+	 */
+	public static void clearAllConnection(Component component) throws Exception {
+		logger.info("clearAllConnection:" + component.get(Component.ID));
+		RTObject rtObject = findComponent(component);
+		for(PortService portService: rtObject.get_ports()) {
+			portService.disconnect_all();
+		}
+	}
+
+	/**
+	 * 
+	 * <div lang="ja">
+	 * コネクターを削除
+	 * @param connector
+	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param connector
+	 * @throws Exception
+	 * </div>
+	 */
 	static public void disconnect(Connector connector) throws Exception {
 		logger.info("disconnect:" + connector.getSourceComponentInstanceName() + connector.getSourceDataPortName() + "->" 
 				+ connector.getTargetComponentInstanceName() +  connector.getTargetDataPortName());
@@ -140,10 +253,19 @@ public class RTSystemBuilder {
 	}
 	
 	
+
 	/**
 	 * 
+	 * <div lang="ja">
+	 * コネクターを作成して接続を実現
 	 * @param connector
 	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param connector
+	 * @throws Exception
+	 * </div>
 	 */
 	static public void connect(Connector connector) throws Exception {
 		logger.info("connect:" + connector.getSourceComponentInstanceName() + connector.getSourceDataPortName() + "->" 
@@ -192,10 +314,19 @@ public class RTSystemBuilder {
 		}
 	}
 	
+
 	/**
 	 * 
+	 * <div lang="ja">
+	 * プロファイルに登録されているすべてのRTCをactivate
 	 * @param rtSystemProfile
 	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param rtSystemProfile
+	 * @throws Exception
+	 * </div>
 	 */
 	static public void activateRTCs(RTSystemProfile rtSystemProfile) throws Exception {
 		logger.info("activateRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
@@ -204,9 +335,19 @@ public class RTSystemBuilder {
 		}
 	}
 
+
 	/**
-	 * @throws Exception 
 	 * 
+	 * <div lang="ja">
+	 * プロファイルに登録されているすべてのRTCをdeactivate
+	 * @param rtSystemProfile
+	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param rtSystemProfile
+	 * @throws Exception
+	 * </div>
 	 */
 	static public void deactivateRTCs(RTSystemProfile rtSystemProfile) throws Exception {
 		logger.info("deactivateRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
@@ -215,9 +356,19 @@ public class RTSystemBuilder {
 		}
 	}
 
+
 	/**
-	 * @throws Exception 
 	 * 
+	 * <div lang="ja">
+	 * プロファイルに登録されているすべてのRTCをreset
+	 * @param rtSystemProfile
+	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param rtSystemProfile
+	 * @throws Exception
+	 * </div>
 	 */
 	static public void resetRTCs(RTSystemProfile rtSystemProfile) throws Exception {
 		logger.info("resetRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
@@ -226,6 +377,19 @@ public class RTSystemBuilder {
 		}
 	}
 	
+	/**
+	 * 
+	 * <div lang="ja">
+	 *
+	 * @param rtObject
+	 * @return
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param rtObject
+	 * @return
+	 * </div>
+	 */
 	static public String buildComponentId(RTC.RTObject rtObject) {
 		ComponentProfile profile;
 		profile = rtObject.get_component_profile();
@@ -235,9 +399,18 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
+	 * <div lang="ja">
+	 * 
 	 * @param pathUri
 	 * @return
 	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param pathUri
+	 * @return
+	 * @throws Exception
+	 * </div>
 	 */
 	static public Component createComponent(String pathUri) throws Exception {
 		RTObject rtObject = findComponent(pathUri);
@@ -309,11 +482,22 @@ public class RTSystemBuilder {
 	
 	/**
 	 * 
+	 * <div lang="ja">
+	 * 接続プロファイルの作成
+	 * @param componentSet
 	 * @param connectorProfile
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param componentSet
+	 * @param connectorProfile
+	 * @return
+	 * @throws Exception
+	 * </div>
 	 */
-	static protected Connector createConnector(Set<Component> componentSet, ConnectorProfile connectorProfile) throws Exception {
+	static public Connector createConnector(Set<Component> componentSet, ConnectorProfile connectorProfile) throws Exception {
 		String connectorId, name, dataType = "";
 		String interfaceType = "", dataflowType = "", subscriptionType = "";
 		connectorId = connectorProfile.connector_id;
@@ -367,6 +551,21 @@ public class RTSystemBuilder {
 		return connector;
 	}
 	
+	/**
+	 * 
+	 * <div lang="ja">
+	 * URIからコンポーネントを検索
+	 * @param pathUri
+	 * @return
+	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param pathUri
+	 * @return
+	 * @throws Exception
+	 * </div>
+	 */
 	static public RTC.RTObject findComponent(String pathUri) throws Exception {
 		logger.info("findComponent:" + pathUri);
 		StringTokenizer tokenizer = new StringTokenizer(pathUri, "/");
@@ -393,22 +592,95 @@ public class RTSystemBuilder {
 		corbaConsumer.setObject(obj);
 		return corbaConsumer._ptr();
 	}
-	
-	
+
 	/**
-	 * 
+	 * <div lang="ja">
+	 * コンポーネントプロファイルからRTObjectを検索
 	 * @param component
 	 * @return
 	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param component
+	 * @return
+	 * @throws Exception
+	 * </div>
 	 */
 	static public RTC.RTObject findComponent(Component component) throws Exception {
 		return findComponent(component.get(Component.PATH_URI));
 	}
+	
+	
+	/**
+	 * <div lang="ja">
+	 *
+	 * @param pathUri
+	 * @return
+	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param pathUri
+	 * @return
+	 * @throws Exception
+	 * </div>
+	 */
+	static public RTCCondition getComponentCondition(String pathUri) throws Exception {
+		RTObject rtObject;
+		try {
+			rtObject = findComponent(pathUri);
+		} catch (Exception ex) {
+			return RTCCondition.NONE;
+		}
+		
+		RTC.ExecutionContext[] ecs = rtObject.get_owned_contexts();
+		LifeCycleState state = ecs[0].get_component_state(rtObject);
+		if(state.equals(LifeCycleState.ACTIVE_STATE)) {
+			return RTCCondition.ACTIVE;
+		} else 	if(state.equals(LifeCycleState.INACTIVE_STATE)) {
+			return RTCCondition.INACTIVE;
+		} else 	if(state.equals(LifeCycleState.CREATED_STATE)) {
+			return RTCCondition.CREATED;
+		} else 	if(state.equals(LifeCycleState.ERROR_STATE)) {
+			return RTCCondition.ERROR;
+		}
+		else {
+			throw new Exception();
+		}
+
+	}
+	
+	/**
+	 * <div lang="ja">
+	 * コンポーネントプロファイルのRTCを検索し，即座に状態を取得する
+	 * @param component
+	 * @return
+	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param component
+	 * @return
+	 * @throws Exception
+	 * </div>
+	 */
+	static public RTCCondition getComponentCondition(Component component) throws Exception {
+		return getComponentCondition(component.get(Component.PATH_URI));
+	}
 
 	/**
 	 * 
-	 * @param obj
+	 * <div lang="ja">
+	 * コンポーネントプロファイルからRTObjectを検索して即座にactivate
+	 * @param component
 	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param component
+	 * @throws Exception
+	 * </div>
 	 */
 	static public void activateComponent(Component component) throws Exception {
 		try {
@@ -444,8 +716,16 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * @param obj
-	 * @throws Exception 
+	 * <div lang="ja">
+	 * コンポーネントプロファイルからRTObjectを検索して即座にdeactivate
+	 * @param component
+	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param component
+	 * @throws Exception
+	 * </div>
 	 */
 	static public void deactivateComponent(Component component) throws Exception {
 		try {
@@ -482,8 +762,16 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * @param obj
-	 * @throws Exception 
+	 * <div lang="ja">
+	 * コンポーネントプロファイルからRTObjectを検索して即座にreset
+	 * @param component
+	 * @throws Exception
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param component
+	 * @throws Exception
+	 * </div>
 	 */
 	static public void resetComponent(Component component) throws Exception {
 		try {
@@ -516,5 +804,7 @@ public class RTSystemBuilder {
 			e.printStackTrace();
 		}
 	}
+	
+	
 
 }
