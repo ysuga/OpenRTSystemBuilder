@@ -1,0 +1,38 @@
+h1. OpenRTSystemBuilder
+
+*Author: Yuki Suga
+*E-mail: ysuga at ysuga.net
+*Date  : since 2011/08/05
+
+h2. Contents
+
+*Objective & Goal
+*Characteristics
+*Target System and Dependency
+*Usage and References
+*Link
+
+h2. Objective & Goal
+
+My goal is to create easy-access RTSystemProfile library.
+
+h2. Characteristics
+
+OpenRTSystemBuilder allows you to read / write RTSytemProfile.
+OpenRTSystemBuilder also enables to build/activate /deactivate/reset/destroy RT-System on-line.
+
+h2. Target System and Dependency
+
+OpenRTSystemBuilder depends on...
+
+OpenRTM-aist 1.0 Java: http://www.openrtm.org/
+
+h2. Usage and References
+
+Download all dependencies.
+
+h2. Link
+
+*OpenRTM-aist : http://www.openrtm.org
+*Developers Page : http://www.ysuga.net
+
