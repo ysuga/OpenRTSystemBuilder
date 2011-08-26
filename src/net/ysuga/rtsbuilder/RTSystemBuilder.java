@@ -97,6 +97,26 @@ public class RTSystemBuilder {
 		return ret;
 	}
 		
+	/**
+	 * 
+	 * <div lang="ja">
+	 * RTシステムの構築
+	 * @param rtSystemProfile
+	 * </div>
+	 * <div lang="en">
+	 * @param rtSystemProfile
+	 * </div>
+	 */
+	static public void configure(RTSystemProfile rtSystemProfile) {
+		logger.info("configure:" + rtSystemProfile.get(RTSystemProfile.ID));
+		for(Component component: rtSystemProfile.componentSet) {
+			try {
+				configureComponent(component);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	/**
 	 * 
@@ -108,15 +128,8 @@ public class RTSystemBuilder {
 	 * @param rtSystemProfile
 	 * </div>
 	 */
-	static public void buildRTSystem(RTSystemProfile rtSystemProfile) {
-		logger.info("buildRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Component component: rtSystemProfile.componentSet) {
-			try {
-				configureComponent(component);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+	static public void buildConnection(RTSystemProfile rtSystemProfile) {
+		logger.info("buildConnection:" + rtSystemProfile.get(RTSystemProfile.ID));
 		for(Connector connector : rtSystemProfile.connectorSet) {
 			try {
 				connect(connector);
@@ -631,6 +644,7 @@ public class RTSystemBuilder {
 		try {
 			rtObject = findComponent(pathUri);
 		} catch (Exception ex) {
+			logger.warning("Component(" + pathUri+") cannot found");
 			return RTCCondition.NONE;
 		}
 		

@@ -17,7 +17,7 @@ public class RTSProfileTest {
 			RTSystemProfile profile = new RTSystemProfile(new File("FungiEaterSystem.xml"));
 
 			
-			RTSystemBuilder.buildRTSystem(profile);
+			RTSystemBuilder.buildConnection(profile);
 			RTSystemBuilder.deactivateRTCs(profile);
 
 			RTSystemBuilder.resetRTCs(profile);
