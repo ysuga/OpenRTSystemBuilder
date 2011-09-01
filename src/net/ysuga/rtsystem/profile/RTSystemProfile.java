@@ -54,9 +54,9 @@ public class RTSystemProfile extends RTSProperties {
 	protected String formatCalendar(Calendar calendar) {
 		MessageFormat mf = new MessageFormat(
 				"{0,date,yyyy-MM-dd}T{0,date,HH:mm:ss.SSSZ}");
-		Object[] objs = { calendar.getTime()};
+		Object[] objs = { calendar.getTime() };
 		StringBuffer buf = new StringBuffer(mf.format(objs));
-		buf.insert(buf.length()-2, ":");
+		buf.insert(buf.length() - 2, ":");
 		return buf.toString();
 	}
 
@@ -83,7 +83,7 @@ public class RTSystemProfile extends RTSProperties {
 	 */
 	public Element getElement(String elementName, Document document) {
 		Element element = createElement(elementName, document);
-		for (Component component : componentSet) {
+		for (RTSProperties component : componentSet) {
 			element.appendChild(component
 					.getElement("rts:Components", document));
 		}
@@ -129,6 +129,38 @@ public class RTSystemProfile extends RTSProperties {
 				addConnector(new Connector(node));
 			}
 		}
+
+		/**
+		for (Component component : componentSet) {
+			for (Component.DataPort dataPort : component.dataPortSet) {
+				for (Connector connector : connectorSet) {
+					if (dataPort.get(Component.DataPort.RTS_NAME).equals(
+							connector.sourceDataPort
+									.get(Connector.DataPort.PORT_NAME))
+							&& component.get(Component.PATH_URI).equals(
+									connector.sourceDataPort.properties
+											.get(Properties.VALUE))) {
+						System.out.println(component.get(Component.PATH_URI) + dataPort.get(Component.DataPort.RTS_NAME) 
+								+ " is OutPort");
+						dataPort.setDirection(Component.DataPort.DIRECTION_OUT);
+					} else if (dataPort.get(Component.DataPort.RTS_NAME)
+							.equals(connector.targetDataPort
+									.get(Connector.DataPort.PORT_NAME))
+							&& component.get(Component.PATH_URI).equals(
+									connector.targetDataPort.properties
+											.get(Properties.VALUE))) {
+						System.out.println(component.get(Component.PATH_URI) + dataPort.get(Component.DataPort.RTS_NAME) 
+								+ " is InPort");
+						
+						dataPort.setDirection(Component.DataPort.DIRECTION_IN);
+					}
+
+				}
+
+			}
+		}
+		*/
+
 	}
 
 	/**
@@ -138,10 +170,11 @@ public class RTSystemProfile extends RTSProperties {
 	 * @throws TransformerFactoryConfigurationError
 	 * @throws TransformerException
 	 * @throws FileNotFoundException
-	 * @throws ParserConfigurationException 
+	 * @throws ParserConfigurationException
 	 */
 	public void save(File file) throws TransformerFactoryConfigurationError,
-			FileNotFoundException, TransformerException, ParserConfigurationException {
+			FileNotFoundException, TransformerException,
+			ParserConfigurationException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setValidating(true);
 		DocumentBuilder db = dbf.newDocumentBuilder();
@@ -174,7 +207,7 @@ public class RTSystemProfile extends RTSProperties {
 		connectorSet.add(connector);
 	}
 
-	public void removeComponent(Component component) {
+	public void removeComponent(RTSProperties component) {
 		componentSet.remove(component.get("rts:instanceName"));
 
 	}
@@ -188,9 +221,9 @@ public class RTSystemProfile extends RTSProperties {
 	 * @param name
 	 * @return
 	 */
-	final public Component getComponent(String name) {
-		for(Component component : componentSet) {
-			if(component.get(Component.INSTANCE_NAME).equals(name)){
+	final public RTSProperties getComponent(String name) {
+		for (RTSProperties component : componentSet) {
+			if (component.get(Component.INSTANCE_NAME).equals(name)) {
 				return component;
 			}
 		}
@@ -203,8 +236,8 @@ public class RTSystemProfile extends RTSProperties {
 	 * @return
 	 */
 	final public Connector getConnector(String name) {
-		for(Connector connector : connectorSet) {
-			if(connector.get(Connector.CONNECTOR_ID).equals(name)){
+		for (Connector connector : connectorSet) {
+			if (connector.get(Connector.CONNECTOR_ID).equals(name)) {
 				return connector;
 			}
 		}

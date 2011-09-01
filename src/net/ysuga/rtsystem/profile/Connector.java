@@ -7,6 +7,7 @@
 
 package net.ysuga.rtsystem.profile;
 
+import java.awt.Point;
 import java.io.IOException;
 
 import net.ysuga.rtsbuilder.RTSystemBuilder;
@@ -151,6 +152,7 @@ public class Connector extends RTSProperties {
 			String dataType, String interfaceType, 
 			String dataflowType, String subscriptionType) {
 		super();
+		pivotList = new PivotList();
 		put(INTERFACE_TYPE, interfaceType);
 		put(DATAFLOW_TYPE, dataflowType);
 		put(SUBSCRIPTION_TYPE, subscriptionType);
@@ -239,4 +241,54 @@ public class Connector extends RTSProperties {
 	public void disconnect() throws Exception {
 		RTSystemBuilder.disconnect(this);
 	}
+
+	private PivotList pivotList;
+	/**
+	 * getPivotList
+	 * <div lang="ja">
+	 * 
+	 * @return
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @return
+	 * </div>
+	 */
+	public PivotList getPivotList() {
+		// TODO 自動生成されたメソッド・スタブ
+		return pivotList;
+	}
+
+	/**
+	 * getSelectedPivot
+	 * <div lang="ja">
+	 * 
+	 * @return
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @return
+	 * </div>
+	 */
+	public Point getSelectedPivot() {
+		// TODO 自動生成されたメソッド・スタブ
+		return selectedPivot;
+	}
+
+	private Point selectedPivot;
+	/**
+	 * setSelectedPivot
+	 * <div lang="ja">
+	 * 
+	 * @param selectedPivot
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param selectedPivot
+	 * </div>
+	 */
+	public void setSelectedPivot(Point selectedPivot) {
+		this.selectedPivot = selectedPivot;
+	}
+
 }

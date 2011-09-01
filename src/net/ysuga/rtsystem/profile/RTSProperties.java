@@ -22,10 +22,27 @@ import org.w3c.dom.Node;
  */
 public abstract class RTSProperties extends HashMap<String, String>{
 
+	public boolean onlineVerified;
+	private int state = OFFLINE;
+	
+	public boolean isOnlineVrified() {
+		return onlineVerified;
+	}
+	
+	public void setOnlineVerified(boolean flag) {
+		onlineVerified = flag;
+	}
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -5882683826959094864L;
+	public static final int OFFLINE = 0;
+	public static final int ONLINE_UNKNOWN = 1;
+	public static final int ONLINE_CREATED = 2;
+	public static final int ONLINE_INACTIVE = 3;
+	public static final int ONLINE_ACTIVE = 4;
+	public static final int ONLINE_ERROR = 5;
 
 	/**
 	 * Constructor
@@ -78,5 +95,13 @@ public abstract class RTSProperties extends HashMap<String, String>{
 	 * @return Element object 
 	 */
 	public abstract Element getElement(String elementName, Document document);
+
+	public void setState(int state) {
+		this.state = state;
+	}
+
+	public int getState() {
+		return state;
+	}
 }
  

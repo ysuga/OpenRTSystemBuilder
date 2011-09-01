@@ -1,5 +1,3 @@
-
-
 package net.ysuga.rtsbuilder;
 
 import java.util.HashMap;
@@ -20,6 +18,7 @@ import net.ysuga.rtsystem.profile.Connector;
 import net.ysuga.rtsystem.profile.ExecutionContext;
 import net.ysuga.rtsystem.profile.Location;
 import net.ysuga.rtsystem.profile.Properties;
+import net.ysuga.rtsystem.profile.RTSProperties;
 import net.ysuga.rtsystem.profile.RTSystemProfile;
 import OpenRTM.DataFlowComponent;
 import RTC.ComponentProfile;
@@ -46,48 +45,37 @@ import _SDOPackage.NameValue;
  */
 /**
  * @author ysuga
- *
+ * 
  */
 public class RTSystemBuilder {
 	static private Logger logger;
-	
+
 	static private Map<String, CorbaNaming> corbaNamingMap;
 
 	static {
 		logger = Logger.getLogger("net.ysuga.rtsbuilder");
 		corbaNamingMap = new HashMap<String, CorbaNaming>();
 	}
-	
-
 
 	/**
 	 * 
-	 * <div lang="ja">
-	 * コンストラクタ
-	 * </div>
-	 * <div lang="en">
-	 * Constructor
-	 * </div>
+	 * <div lang="ja"> コンストラクタ </div> <div lang="en"> Constructor </div>
 	 */
 	public RTSystemBuilder() {
-		
-	}	
 
+	}
 
 	/**
-	 * <div lang="ja">
-	 * プロファイル内のRTコンポーネントの存在確認
-	 * @param rtSystemProfile 
-	 * @return すべて存在ならtrue
-	 * </div>
-	 * <div lang="en">
+	 * <div lang="ja"> プロファイル内のRTコンポーネントの存在確認
+	 * 
 	 * @param rtSystemProfile
-	 * @return
-	 * </div>
+	 * @return すべて存在ならtrue </div> <div lang="en">
+	 * @param rtSystemProfile
+	 * @return </div>
 	 */
 	static public boolean searchRTCs(RTSystemProfile rtSystemProfile) {
 		boolean ret = false;
-		for(Component component: rtSystemProfile.componentSet) {
+		for (Component component : rtSystemProfile.componentSet) {
 			try {
 				findComponent(component);
 			} catch (Exception e) {
@@ -96,20 +84,37 @@ public class RTSystemBuilder {
 		}
 		return ret;
 	}
-		
 	/**
-	 * 
+	 * searchConnections
 	 * <div lang="ja">
-	 * RTシステムの構築
+	 * 
 	 * @param rtSystemProfile
 	 * </div>
 	 * <div lang="en">
+	 *
 	 * @param rtSystemProfile
 	 * </div>
 	 */
+	public static void searchConnections(RTSystemProfile rtSystemProfile) {
+		for (Connector connector : rtSystemProfile.connectorSet) {
+			try {
+				findConnector(connector);
+			} catch (Exception e) {
+			}
+		}
+	}
+	/**
+	 * 
+	 * <div lang="ja"> RTシステムの構築
+	 * 
+	 * @param rtSystemProfile
+	 *            </div> <div lang="en">
+	 * @param rtSystemProfile
+	 *            </div>
+	 */
 	static public void configure(RTSystemProfile rtSystemProfile) {
 		logger.info("configure:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Component component: rtSystemProfile.componentSet) {
+		for (Component component : rtSystemProfile.componentSet) {
 			try {
 				configureComponent(component);
 			} catch (Exception e) {
@@ -120,98 +125,100 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja">
-	 * RTシステムの構築
+	 * <div lang="ja"> RTシステムの構築
+	 * 
 	 * @param rtSystemProfile
-	 * </div>
-	 * <div lang="en">
+	 *            </div> <div lang="en">
 	 * @param rtSystemProfile
-	 * </div>
+	 *            </div>
 	 */
 	static public void buildConnection(RTSystemProfile rtSystemProfile) {
-		logger.info("buildConnection:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Connector connector : rtSystemProfile.connectorSet) {
+		logger.info("buildConnection:"
+				+ rtSystemProfile.get(RTSystemProfile.ID));
+		for (Connector connector : rtSystemProfile.connectorSet) {
 			try {
 				connect(connector);
-		 	} catch (Exception e) {
-		 		e.printStackTrace();
-		 	}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-
-
 	/**
 	 * 
-	 * <div lang="ja">
-	 * RTコンポーネントのコンフィグレーション
+	 * <div lang="ja"> RTコンポーネントのコンフィグレーション
+	 * 
 	 * @param component
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
+	 *             </div> <div lang="en">
 	 * @param component
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
 	static public void configureComponent(Component component) throws Exception {
-		logger.info("configureComponent:" + component.get(Component.INSTANCE_NAME));
+		logger.info("configureComponent:"
+				+ component.get(Component.INSTANCE_NAME));
 		RTObject rtObject = findComponent(component);
-		
-		_SDOPackage.Configuration sdoConfiguration = rtObject.get_configuration();
-		for(ConfigurationSet configurationSet : component.configurationSetSet) {
-			_SDOPackage.ConfigurationSet sdoConfigurationSet = sdoConfiguration.get_configuration_set(configurationSet.get(ConfigurationSet.ID));
+
+		_SDOPackage.Configuration sdoConfiguration = rtObject
+				.get_configuration();
+		for (ConfigurationSet configurationSet : component.configurationSetSet) {
+			_SDOPackage.ConfigurationSet sdoConfigurationSet = sdoConfiguration
+					.get_configuration_set(configurationSet
+							.get(ConfigurationSet.ID));
 			NVListHolder nvListHolder = new NVListHolder();
 			nvListHolder.value = new NameValue[0];
-			for(ConfigurationData configurationData : configurationSet.configurationDataSet) {
+			for (ConfigurationData configurationData : configurationSet.configurationDataSet) {
 				CORBA_SeqUtil.push_back(nvListHolder, NVUtil.newNVString(
 						configurationData.get(ConfigurationData.NAME),
 						configurationData.get(ConfigurationData.DATA)));
 			}
 			sdoConfigurationSet.configuration_data = nvListHolder.value;
 			sdoConfiguration.add_configuration_set(sdoConfigurationSet);
-			if(component.get(Component.ACTIVE_CONFIGURATION_SET).equals(sdoConfigurationSet.id)) {
-				sdoConfiguration.activate_configuration_set(sdoConfigurationSet.id);
+			if (component.get(Component.ACTIVE_CONFIGURATION_SET).equals(
+					sdoConfigurationSet.id)) {
+				sdoConfiguration
+						.activate_configuration_set(sdoConfigurationSet.id);
 			}
 		}
 	}
 
-
 	/**
 	 * 
-	 * <div lang="ja">
-	 * RTシステムの破壊．プロファイルに登録されているすべての接続を解除
+	 * <div lang="ja"> RTシステムの破壊．プロファイルに登録されているすべての接続を解除
+	 * 
 	 * @param rtSystemProfile
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *            </div> <div lang="en">
+	 * 
 	 * @param rtSystemProfile
-	 * </div>
+	 *            </div>
 	 */
 	static public void destroyRTSystem(RTSystemProfile rtSystemProfile) {
-		logger.info("destroyRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Connector connector : rtSystemProfile.connectorSet) {
+		logger.info("destroyRTSystem:"
+				+ rtSystemProfile.get(RTSystemProfile.ID));
+		for (Connector connector : rtSystemProfile.connectorSet) {
 			try {
 				disconnect(connector);
-		 	} catch (Exception e) {
-		 		e.printStackTrace();
-		 	}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	/**
 	 * 
-	 * <div lang="ja">
-	 * プロファイルに登録されているすべてのRTコンポーネントの持つポートのコネクションを削除
+	 * <div lang="ja"> プロファイルに登録されているすべてのRTコンポーネントの持つポートのコネクションを削除
+	 * 
 	 * @param rtSystemProfile
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *            </div> <div lang="en">
+	 * 
 	 * @param rtSystemProfile
-	 * </div>
+	 *            </div>
 	 */
 	static public void clearAllConnection(RTSystemProfile rtSystemProfile) {
-		logger.info("clearAllConnection:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Component component: rtSystemProfile.componentSet) {
+		logger.info("clearAllConnection:"
+				+ rtSystemProfile.get(RTSystemProfile.ID));
+		for (Component component : rtSystemProfile.componentSet) {
 			try {
 				clearAllConnection(component);
 			} catch (Exception e) {
@@ -220,72 +227,74 @@ public class RTSystemBuilder {
 		}
 	}
 
-
 	/**
 	 * 
-	 * <div lang="ja">
-	 * コンポーネントのすべての接続を削除
+	 * <div lang="ja"> コンポーネントのすべての接続を削除
+	 * 
 	 * @param component
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *            </div> <div lang="en">
+	 * 
 	 * @param component
-	 * </div>
-	 * @throws Exception 
+	 *            </div>
+	 * @throws Exception
 	 */
 	public static void clearAllConnection(Component component) throws Exception {
 		logger.info("clearAllConnection:" + component.get(Component.ID));
 		RTObject rtObject = findComponent(component);
-		for(PortService portService: rtObject.get_ports()) {
+		for (PortService portService : rtObject.get_ports()) {
 			portService.disconnect_all();
 		}
 	}
 
 	/**
 	 * 
-	 * <div lang="ja">
-	 * コネクターを削除
+	 * <div lang="ja"> コネクターを削除
+	 * 
 	 * @param connector
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param connector
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
 	static public void disconnect(Connector connector) throws Exception {
-		logger.info("disconnect:" + connector.getSourceComponentInstanceName() + connector.getSourceDataPortName() + "->" 
-				+ connector.getTargetComponentInstanceName() +  connector.getTargetDataPortName());
-		RTObject sourceRTObject = findComponent(connector.getSourceComponentPathUri());
-		for(PortService portService : sourceRTObject.get_ports()) {
-			if(portService.get_port_profile().name.equals(connector.getSourceDataPortName())) {
-				 portService.disconnect(connector.get(Connector.CONNECTOR_ID));
+		logger.info("disconnect:" + connector.getSourceComponentInstanceName()
+				+ connector.getSourceDataPortName() + "->"
+				+ connector.getTargetComponentInstanceName()
+				+ connector.getTargetDataPortName());
+		RTObject sourceRTObject = findComponent(connector
+				.getSourceComponentPathUri());
+		for (PortService portService : sourceRTObject.get_ports()) {
+			if (portService.get_port_profile().name.equals(connector
+					.getSourceDataPortName())) {
+				portService.disconnect(connector.get(Connector.CONNECTOR_ID));
 			}
 		}
 	}
-	
-	
 
 	/**
 	 * 
-	 * <div lang="ja">
-	 * コネクターを作成して接続を実現
+	 * <div lang="ja"> コネクターを作成して接続を実現
+	 * 
 	 * @param connector
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param connector
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
 	static public void connect(Connector connector) throws Exception {
-		logger.info("connect:" + connector.getSourceComponentInstanceName() + connector.getSourceDataPortName() + "->" 
-				+ connector.getTargetComponentInstanceName() +  connector.getTargetDataPortName());
-		
-		RTObject sourceRTObject = findComponent(connector.getSourceComponentPathUri());
-		RTObject targetRTObject = findComponent(connector.getTargetComponentPathUri());
+		logger.info("connect:" + connector.getSourceComponentInstanceName()
+				+ connector.getSourceDataPortName() + "->"
+				+ connector.getTargetComponentInstanceName()
+				+ connector.getTargetDataPortName());
+
+		RTObject sourceRTObject = findComponent(connector
+				.getSourceComponentPathUri());
+		RTObject targetRTObject = findComponent(connector
+				.getTargetComponentPathUri());
 
 		// Building Connector Profile
 		ConnectorProfile prof = new ConnectorProfile();
@@ -293,121 +302,125 @@ public class RTSystemBuilder {
 		prof.name = connector.get(Connector.NAME);
 		prof.ports = new PortService[2];
 
-		for(PortService portService : sourceRTObject.get_ports()) {
-			if(portService.get_port_profile().name.equals(connector.getSourceDataPortName())) {
+		for (PortService portService : sourceRTObject.get_ports()) {
+			if (portService.get_port_profile().name.equals(connector
+					.getSourceDataPortName())) {
 				prof.ports[1] = portService;
 			}
 		}
-		for(PortService portService : targetRTObject.get_ports()) {
-			if(portService.get_port_profile().name.equals(connector.getTargetDataPortName())) {
+		for (PortService portService : targetRTObject.get_ports()) {
+			if (portService.get_port_profile().name.equals(connector
+					.getTargetDataPortName())) {
 				prof.ports[0] = portService;
 			}
 		}
-		if(prof.ports[0] == null || prof.ports[1] == null) {
+		if (prof.ports[0] == null || prof.ports[1] == null) {
 			throw new Exception("Invalid RTS Profile");
 		}
-		
+
 		NVListHolder nvholder = new NVListHolder();
 		nvholder.value = prof.properties;
 		if (nvholder.value == null)
 			nvholder.value = new NameValue[0];
-		CORBA_SeqUtil.push_back(nvholder, NVUtil.newNVString(
-				"dataport.interface_type", connector.get(Connector.INTERFACE_TYPE)));
-		CORBA_SeqUtil.push_back(nvholder, NVUtil.newNVString(
-				"dataport.dataflow_type", connector.get(Connector.DATAFLOW_TYPE)));
-		CORBA_SeqUtil.push_back(nvholder, NVUtil.newNVString(
-				"dataport.subscription_type", connector.get(Connector.SUBSCRIPTION_TYPE)));
+		CORBA_SeqUtil.push_back(
+				nvholder,
+				NVUtil.newNVString("dataport.interface_type",
+						connector.get(Connector.INTERFACE_TYPE)));
+		CORBA_SeqUtil.push_back(
+				nvholder,
+				NVUtil.newNVString("dataport.dataflow_type",
+						connector.get(Connector.DATAFLOW_TYPE)));
+		CORBA_SeqUtil.push_back(
+				nvholder,
+				NVUtil.newNVString("dataport.subscription_type",
+						connector.get(Connector.SUBSCRIPTION_TYPE)));
 		prof.properties = nvholder.value;
 
 		ConnectorProfileHolder proflist = new ConnectorProfileHolder();
 		proflist.value = prof;
 
-		if( prof.ports[0].connect(proflist) != RTC.ReturnCode_t.RTC_OK) {
-			throw new Exception ("Cannot Connect");
+		if (prof.ports[0].connect(proflist) != RTC.ReturnCode_t.RTC_OK) {
+			throw new Exception("Cannot Connect");
 		}
 	}
-	
 
 	/**
 	 * 
-	 * <div lang="ja">
-	 * プロファイルに登録されているすべてのRTCをactivate
+	 * <div lang="ja"> プロファイルに登録されているすべてのRTCをactivate
+	 * 
 	 * @param rtSystemProfile
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param rtSystemProfile
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
-	static public void activateRTCs(RTSystemProfile rtSystemProfile) throws Exception {
-		logger.info("activateRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Component component: rtSystemProfile.componentSet) {
+	static public void activateRTCs(RTSystemProfile rtSystemProfile)
+			throws Exception {
+		logger.info("activateRTSystem:"
+				+ rtSystemProfile.get(RTSystemProfile.ID));
+		for (Component component : rtSystemProfile.componentSet) {
 			activateComponent(component);
 		}
 	}
 
-
 	/**
 	 * 
-	 * <div lang="ja">
-	 * プロファイルに登録されているすべてのRTCをdeactivate
+	 * <div lang="ja"> プロファイルに登録されているすべてのRTCをdeactivate
+	 * 
 	 * @param rtSystemProfile
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param rtSystemProfile
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
-	static public void deactivateRTCs(RTSystemProfile rtSystemProfile) throws Exception {
-		logger.info("deactivateRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Component component: rtSystemProfile.componentSet) {
+	static public void deactivateRTCs(RTSystemProfile rtSystemProfile)
+			throws Exception {
+		logger.info("deactivateRTSystem:"
+				+ rtSystemProfile.get(RTSystemProfile.ID));
+		for (Component component : rtSystemProfile.componentSet) {
 			deactivateComponent(component);
 		}
 	}
 
+	/**
+	 * 
+	 * <div lang="ja"> プロファイルに登録されているすべてのRTCをreset
+	 * 
+	 * @param rtSystemProfile
+	 * @throws Exception
+	 *             </div> <div lang="en">
+	 * 
+	 * @param rtSystemProfile
+	 * @throws Exception
+	 *             </div>
+	 */
+	static public void resetRTCs(RTSystemProfile rtSystemProfile)
+			throws Exception {
+		logger.info("resetRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
+		for (Component component : rtSystemProfile.componentSet) {
+			resetComponent(component);
+		}
+	}
 
 	/**
 	 * 
 	 * <div lang="ja">
-	 * プロファイルに登録されているすべてのRTCをreset
-	 * @param rtSystemProfile
-	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
-	 * @param rtSystemProfile
-	 * @throws Exception
-	 * </div>
-	 */
-	static public void resetRTCs(RTSystemProfile rtSystemProfile) throws Exception {
-		logger.info("resetRTSystem:" + rtSystemProfile.get(RTSystemProfile.ID));
-		for(Component component: rtSystemProfile.componentSet) {
-			resetComponent(component);
-		}
-	}
-	
-	/**
 	 * 
-	 * <div lang="ja">
-	 *
 	 * @param rtObject
-	 * @return
-	 * </div>
-	 * <div lang="en">
-	 *
+	 * @return </div> <div lang="en">
+	 * 
 	 * @param rtObject
-	 * @return
-	 * </div>
+	 * @return </div>
 	 */
 	static public String buildComponentId(RTC.RTObject rtObject) {
 		ComponentProfile profile;
 		profile = rtObject.get_component_profile();
-		return "RTC:" + profile.vendor + ":" + profile.category + ":" 
-		 + profile.type_name + ":" + profile.version;
+		return "RTC:" + profile.vendor + ":" + profile.category + ":"
+				+ profile.type_name + ":" + profile.version;
 	}
 
 	/**
@@ -417,13 +430,12 @@ public class RTSystemBuilder {
 	 * @param pathUri
 	 * @return
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param pathUri
 	 * @return
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
 	static public Component createComponent(String pathUri) throws Exception {
 		RTObject rtObject = findComponent(pathUri);
@@ -434,157 +446,215 @@ public class RTSystemBuilder {
 		} catch (Exception ex) {
 			return null;
 		}
-		
-		
-		Component component =  new Component(profile.instance_name, 
-				pathUri,
-				buildComponentId(rtObject),
-				rtObject.get_configuration().get_active_configuration_set().id,
-				false,
-				"None");
-		
+
+		Component component = new Component(profile.instance_name, pathUri,
+				buildComponentId(rtObject), rtObject.get_configuration()
+						.get_active_configuration_set().id, false, "None");
+
 		PortService[] portServices = rtObject.get_ports();
-		for(PortService portService : portServices) {
+		for (PortService portService : portServices) {
 			String name = portService.get_port_profile().name;
 			/*
-			NameValue[] nvs = portService.get_port_profile().properties;
-			String dataType = "";
-			for(NameValue nv : nvs) {
-				if(nv.name.equals("dataport.data_type")) {
-					dataType = nv.value.extract_wstring();
-				}
-			}
-			*/
+			 * NameValue[] nvs = portService.get_port_profile().properties;
+			 * String dataType = ""; for(NameValue nv : nvs) {
+			 * if(nv.name.equals("dataport.data_type")) { dataType =
+			 * nv.value.extract_wstring(); } }
+			 */
 			Component.DataPort dataPort = component.new DataPort(name);
 			component.dataPortSet.add(dataPort);
 		}
-		
-		
+
 		// Adding Configuration Sets
 		_SDOPackage.Configuration configuration = rtObject.get_configuration();
-		_SDOPackage.ConfigurationSet[] configurationSets = configuration.get_configuration_sets();
-		for(_SDOPackage.ConfigurationSet configurationSet : configurationSets) {
-			ConfigurationSet myConfigurationSet = new ConfigurationSet(configurationSet.id);
-			for(NameValue configurationData : configurationSet.configuration_data) {
-				myConfigurationSet.configurationDataSet.add(
-						new ConfigurationData(configurationData.name, configurationData.value.toString()));
+		_SDOPackage.ConfigurationSet[] configurationSets = configuration
+				.get_configuration_sets();
+		for (_SDOPackage.ConfigurationSet configurationSet : configurationSets) {
+			ConfigurationSet myConfigurationSet = new ConfigurationSet(
+					configurationSet.id);
+			for (NameValue configurationData : configurationSet.configuration_data) {
+				myConfigurationSet.configurationDataSet
+						.add(new ConfigurationData(configurationData.name,
+								configurationData.value.toString()));
 			}
 			component.configurationSetSet.add(myConfigurationSet);
 		}
 
-
 		// Adding Execution Context
-		RTC.ExecutionContext[] executionContexts = rtObject.get_owned_contexts();
-		for(int i = 0;i < executionContexts.length;i++) {
+		RTC.ExecutionContext[] executionContexts = rtObject
+				.get_owned_contexts();
+		for (int i = 0; i < executionContexts.length; i++) {
 			RTC.ExecutionContext executionContext = executionContexts[i];
 			ExecutionContext myEc = new ExecutionContext(Integer.toString(i),
-					"rtsExt:execution_context_ext",
-					executionContext.get_kind().toString(),
-					Double.toString(executionContext.get_rate()));
+					"rtsExt:execution_context_ext", executionContext.get_kind()
+							.toString(), Double.toString(executionContext
+							.get_rate()));
 			component.executionContextSet.add(myEc);
 		}
-		
+
 		// Adding Location
 		component.location = new Location(-1, -1, -1, -1);
-		
+
 		org.omg.CORBA.ORB orb = ORBUtil.getOrb();
 		String str = orb.object_to_string(rtObject._duplicate());
 		component.properties = new Properties("IOR", str);
 		return component;
 	}
-	
+
 	/**
 	 * 
-	 * <div lang="ja">
-	 * 接続プロファイルの作成
+	 * <div lang="ja"> 接続プロファイルの作成
+	 * 
 	 * @param componentSet
 	 * @param connectorProfile
 	 * @return
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param componentSet
 	 * @param connectorProfile
 	 * @return
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
-	static public Connector createConnector(Set<Component> componentSet, ConnectorProfile connectorProfile) throws Exception {
+	static public Connector createConnector(Set<Component> componentSet,
+			ConnectorProfile connectorProfile) throws Exception {
 		String connectorId, name, dataType = "";
 		String interfaceType = "", dataflowType = "", subscriptionType = "";
 		connectorId = connectorProfile.connector_id;
 		name = connectorProfile.name;
-		for(_SDOPackage.NameValue nameValue : connectorProfile.properties) {
-			if(nameValue.name.equals("dataport.data_type")) {
+		for (_SDOPackage.NameValue nameValue : connectorProfile.properties) {
+			if (nameValue.name.equals("dataport.data_type")) {
 				dataType = nameValue.value.extract_string();
-			} else if(nameValue.name.equals("dataport.dataflow_type")) {
+			} else if (nameValue.name.equals("dataport.dataflow_type")) {
 				dataflowType = nameValue.value.extract_string();
-			} else if(nameValue.name.equals("dataport.subscription_type")) {
+			} else if (nameValue.name.equals("dataport.subscription_type")) {
 				subscriptionType = nameValue.value.extract_string();
-			} else if(nameValue.name.equals("dataport.interface_type")) {
+			} else if (nameValue.name.equals("dataport.interface_type")) {
 				interfaceType = nameValue.value.extract_string();
 			}
 		}
-		
-		Connector connector = new Connector(connectorId, name, 
-				dataType, interfaceType, dataflowType, subscriptionType);
-	
+
+		Connector connector = new Connector(connectorId, name, dataType,
+				interfaceType, dataflowType, subscriptionType);
+
 		String sourcePathUri = null, targetPathUri = null;
 		RTObject sourceRTC = connectorProfile.ports[0].get_port_profile().owner;
 		RTObject targetRTC = connectorProfile.ports[1].get_port_profile().owner;
-		for(Component component : componentSet) {
-			if(findComponent(component).equals(sourceRTC)) {
+		for (Component component : componentSet) {
+			if (findComponent(component).equals(sourceRTC)) {
 				sourcePathUri = component.get(Component.PATH_URI);
 			}
 		}
-		for(Component component : componentSet) {
-			if(findComponent(component).equals(targetRTC)) {
+		for (Component component : componentSet) {
+			if (findComponent(component).equals(targetRTC)) {
 				targetPathUri = component.get(Component.PATH_URI);
 			}
-		
+
 		}
-		if(sourcePathUri == null || targetPathUri == null) {
+		if (sourcePathUri == null || targetPathUri == null) {
 			throw new Exception();
 		}
-		
+
 		connector.sourceDataPort = connector.new DataPort(
 				connectorProfile.ports[0].get_port_profile().name,
-				connectorProfile.ports[0].get_port_profile().owner.get_component_profile().instance_name,
-				RTSystemBuilder.buildComponentId(connectorProfile.ports[0].get_port_profile().owner));
-		connector.sourceDataPort.properties = new Properties("COMPONENT_PATH_ID", sourcePathUri);
+				connectorProfile.ports[0].get_port_profile().owner
+						.get_component_profile().instance_name,
+				RTSystemBuilder.buildComponentId(connectorProfile.ports[0]
+						.get_port_profile().owner));
+		connector.sourceDataPort.properties = new Properties(
+				"COMPONENT_PATH_ID", sourcePathUri);
 
 		connector.targetDataPort = connector.new DataPort(
 				connectorProfile.ports[1].get_port_profile().name,
-				connectorProfile.ports[1].get_port_profile().owner.get_component_profile().instance_name,
-				RTSystemBuilder.buildComponentId(connectorProfile.ports[1].get_port_profile().owner));					
-		connector.targetDataPort.properties = new Properties("COMPONENT_PATH_ID", targetPathUri);
-		
-	
+				connectorProfile.ports[1].get_port_profile().owner
+						.get_component_profile().instance_name,
+				RTSystemBuilder.buildComponentId(connectorProfile.ports[1]
+						.get_port_profile().owner));
+		connector.targetDataPort.properties = new Properties(
+				"COMPONENT_PATH_ID", targetPathUri);
+
 		return connector;
+	}
+
+	static public ConnectorProfile findConnector(Connector connector) throws Exception {
+		
+		logger.info("findConnector:" + connector.getSourceComponentInstanceName()
+				+ connector.getSourceDataPortName() + "->"
+				+ connector.getTargetComponentInstanceName()
+				+ connector.getTargetDataPortName());
+
+		RTObject sourceRTObject = findComponent(connector
+				.getSourceComponentPathUri());
+		RTObject targetRTObject = findComponent(connector
+				.getTargetComponentPathUri());
+
+		// Building Connector Profile
+		ConnectorProfile prof = new ConnectorProfile();
+		prof.connector_id = connector.get(Connector.CONNECTOR_ID);
+		prof.name = connector.get(Connector.NAME);
+		prof.ports = new PortService[2];
+
+		for (PortService portService : sourceRTObject.get_ports()) {
+			if (portService.get_port_profile().name.equals(connector
+					.getSourceDataPortName())) {
+				prof.ports[1] = portService;
+			}
+		}
+		for (PortService portService : targetRTObject.get_ports()) {
+			if (portService.get_port_profile().name.equals(connector
+					.getTargetDataPortName())) {
+				prof.ports[0] = portService;
+			}
+		}
+		if (prof.ports[0] == null || prof.ports[1] == null) {
+			throw new Exception("Invalid RTS Profile");
+		}
+		
+		ConnectorProfile[] con_pros = prof.ports[0].get_connector_profiles();
+		for(ConnectorProfile con_prof : con_pros) {
+			if(/*con_prof.connector_id.equals(connector.get(Connector.CONNECTOR_ID)) &&*/
+					con_prof.name.equals(connector.get(Connector.NAME))
+					&&
+					(con_prof.ports[0].get_port_profile().name.equals(connector.getSourceDataPortName()) ||
+							con_prof.ports[0].get_port_profile().name.equals(connector.getTargetDataPortName())) &&
+					(con_prof.ports[1].get_port_profile().name.equals(connector.getSourceDataPortName()) ||
+							con_prof.ports[1].get_port_profile().name.equals(connector.getTargetDataPortName()))
+					) {
+				
+				
+				connector.setState(RTSProperties.ONLINE_ACTIVE);
+				
+				
+				return con_prof;
+			}
+							
+		}
+		
+		connector.setState(RTSProperties.OFFLINE);
+		
+		
+		return null;
 	}
 	
 	/**
 	 * 
-	 * <div lang="ja">
-	 * URIからコンポーネントを検索
+	 * <div lang="ja"> URIからコンポーネントを検索
+	 * 
 	 * @param pathUri
 	 * @return
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param pathUri
 	 * @return
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
 	static public RTC.RTObject findComponent(String pathUri) throws Exception {
 		logger.info("findComponent:" + pathUri);
 		StringTokenizer tokenizer = new StringTokenizer(pathUri, "/");
 		String namingURI = tokenizer.nextToken();
-		String compURI = pathUri.substring(
-				namingURI.length() + 1);
+		String compURI = pathUri.substring(namingURI.length() + 1);
 		StringTokenizer tokenizer2 = new StringTokenizer(namingURI, ":");
 		if (tokenizer2.countTokens() == 1) {
 			namingURI = namingURI + ":2809";
@@ -603,116 +673,158 @@ public class RTSystemBuilder {
 		CorbaConsumer<DataFlowComponent> corbaConsumer = new CorbaConsumer<DataFlowComponent>(
 				DataFlowComponent.class);
 		corbaConsumer.setObject(obj);
-		return corbaConsumer._ptr();
+		RTObject rtObject = corbaConsumer._ptr();
+
+		return rtObject;
+	}
+
+	/**
+	 * <div lang="ja"> コンポーネントプロファイルからRTObjectを検索
+	 * 
+	 * @param component
+	 * @return
+	 * @throws Exception
+	 *             </div> <div lang="en">
+	 * 
+	 * @param component
+	 * @return
+	 * @throws Exception
+	 *             </div>
+	 */
+	static public RTC.RTObject findComponent(Component component)
+			throws Exception {
+		component.setState(RTSProperties.OFFLINE);
+		RTObject rtObject = findComponent(component.get(Component.PATH_URI));
+		
+		component.setState(RTSProperties.ONLINE_UNKNOWN);
+		RTC.ExecutionContext[] ecs = rtObject.get_owned_contexts();
+		LifeCycleState state = ecs[0].get_component_state(rtObject);
+		if (state.equals(LifeCycleState.ACTIVE_STATE)) {
+			component.setState(RTSProperties.ONLINE_ACTIVE);
+		} else if (state.equals(LifeCycleState.INACTIVE_STATE)) {
+			component.setState(RTSProperties.ONLINE_INACTIVE);
+		} else if (state.equals(LifeCycleState.CREATED_STATE)) {
+			component.setState(RTSProperties.ONLINE_CREATED);
+		} else if (state.equals(LifeCycleState.ERROR_STATE)) {
+			component.setState(RTSProperties.ONLINE_ERROR);
+		}
+		
+		
+		for (Component.DataPort dataPort : (Set<Component.DataPort>) component.dataPortSet) {
+			if (dataPort.getDirection() == Component.DataPort.DIRECTION_UNKNOWN) {
+				PortService[] portServices = rtObject.get_ports();
+				for (int i = 0; i < portServices.length; i++) {
+					if (portServices[i].get_port_profile().name.equals(dataPort
+							.get(Component.DataPort.RTS_NAME))) {
+						for (NameValue profile : portServices[i]
+								.get_port_profile().properties) {
+							if (profile.name.equals("port.port_type")) {
+								if (profile.value.extract_wstring().equals(
+										"DataInPort")) {
+									dataPort.setDirection(Component.DataPort.DIRECTION_IN);
+								} else if (profile.value.extract_wstring().equals(
+										"DataOutPort")) {
+									dataPort.setDirection(Component.DataPort.DIRECTION_OUT);
+								}
+							}
+						}
+
+					}
+				}
+			}
+		}
+
+		return rtObject;
 	}
 
 	/**
 	 * <div lang="ja">
-	 * コンポーネントプロファイルからRTObjectを検索
-	 * @param component
-	 * @return
-	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
-	 * @param component
-	 * @return
-	 * @throws Exception
-	 * </div>
-	 */
-	static public RTC.RTObject findComponent(Component component) throws Exception {
-		return findComponent(component.get(Component.PATH_URI));
-	}
-	
-	
-	/**
-	 * <div lang="ja">
-	 *
+	 * 
 	 * @param pathUri
 	 * @return
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param pathUri
 	 * @return
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
-	static public RTCCondition getComponentCondition(String pathUri) throws Exception {
+	static public RTCCondition getComponentCondition(String pathUri)
+			throws Exception {
 		RTObject rtObject;
 		try {
 			rtObject = findComponent(pathUri);
 		} catch (Exception ex) {
-			logger.warning("Component(" + pathUri+") cannot found");
+			logger.warning("Component(" + pathUri + ") cannot found");
 			return RTCCondition.NONE;
 		}
-		
+
 		RTC.ExecutionContext[] ecs = rtObject.get_owned_contexts();
 		LifeCycleState state = ecs[0].get_component_state(rtObject);
-		if(state.equals(LifeCycleState.ACTIVE_STATE)) {
+		if (state.equals(LifeCycleState.ACTIVE_STATE)) {
 			return RTCCondition.ACTIVE;
-		} else 	if(state.equals(LifeCycleState.INACTIVE_STATE)) {
+		} else if (state.equals(LifeCycleState.INACTIVE_STATE)) {
 			return RTCCondition.INACTIVE;
-		} else 	if(state.equals(LifeCycleState.CREATED_STATE)) {
+		} else if (state.equals(LifeCycleState.CREATED_STATE)) {
 			return RTCCondition.CREATED;
-		} else 	if(state.equals(LifeCycleState.ERROR_STATE)) {
+		} else if (state.equals(LifeCycleState.ERROR_STATE)) {
 			return RTCCondition.ERROR;
-		}
-		else {
+		} else {
 			throw new Exception();
 		}
 
 	}
-	
+
 	/**
-	 * <div lang="ja">
-	 * コンポーネントプロファイルのRTCを検索し，即座に状態を取得する
+	 * <div lang="ja"> コンポーネントプロファイルのRTCを検索し，即座に状態を取得する
+	 * 
 	 * @param component
 	 * @return
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param component
 	 * @return
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
-	static public RTCCondition getComponentCondition(Component component) throws Exception {
+	static public RTCCondition getComponentCondition(RTSProperties component)
+			throws Exception {
 		return getComponentCondition(component.get(Component.PATH_URI));
 	}
 
 	/**
 	 * 
-	 * <div lang="ja">
-	 * コンポーネントプロファイルからRTObjectを検索して即座にactivate
+	 * <div lang="ja"> コンポーネントプロファイルからRTObjectを検索して即座にactivate
+	 * 
 	 * @param component
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param component
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
 	static public void activateComponent(Component component) throws Exception {
 		try {
-			logger.info("activateComponent:" + component.get(Component.INSTANCE_NAME));
+			logger.info("activateComponent:"
+					+ component.get(Component.INSTANCE_NAME));
 			RTObject obj = findComponent(component);
 
 			ExecutionContextListHolder ecListHolder = new ExecutionContextListHolder();
 			ecListHolder.value = new RTC.ExecutionContext[1];
 			ecListHolder.value = obj.get_owned_contexts();
-			
-			LifeCycleState currentState = ecListHolder.value[0].get_component_state(obj);
-			if(!currentState.equals(LifeCycleState.INACTIVE_STATE)) {
-				
+
+			LifeCycleState currentState = ecListHolder.value[0]
+					.get_component_state(obj);
+			if (!currentState.equals(LifeCycleState.INACTIVE_STATE)) {
+
 				// TODO: Invalid pre-state
-				
-				return ;
+
+				return;
 			}
-			
+
 			ecListHolder.value[0].activate_component(obj);
 			LifeCycleState state;
 			do {
@@ -730,36 +842,38 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja">
-	 * コンポーネントプロファイルからRTObjectを検索して即座にdeactivate
+	 * <div lang="ja"> コンポーネントプロファイルからRTObjectを検索して即座にdeactivate
+	 * 
 	 * @param component
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param component
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
-	static public void deactivateComponent(Component component) throws Exception {
+	static public void deactivateComponent(Component component)
+			throws Exception {
 		try {
-			logger.info("deactivateComponent:" + component.get(Component.INSTANCE_NAME));
+			logger.info("deactivateComponent:"
+					+ component.get(Component.INSTANCE_NAME));
 			RTObject obj = findComponent(component);
-			
+
 			ExecutionContextListHolder ecListHolder = new ExecutionContextListHolder();
 			ecListHolder.value = new RTC.ExecutionContext[1];
 			ecListHolder.value = obj.get_owned_contexts();
-			
-			LifeCycleState currentState = ecListHolder.value[0].get_component_state(obj);
-			if(!currentState.equals(LifeCycleState.ACTIVE_STATE)) {
-				
+
+			LifeCycleState currentState = ecListHolder.value[0]
+					.get_component_state(obj);
+			if (!currentState.equals(LifeCycleState.ACTIVE_STATE)) {
+
 				// TODO: Invalid pre-state
-				
-				return ;
+
+				return;
 			}
-			
+
 			ecListHolder.value[0].deactivate_component(obj);
-			
+
 			LifeCycleState state;
 			do {
 				try {
@@ -776,34 +890,34 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja">
-	 * コンポーネントプロファイルからRTObjectを検索して即座にreset
+	 * <div lang="ja"> コンポーネントプロファイルからRTObjectを検索して即座にreset
+	 * 
 	 * @param component
 	 * @throws Exception
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *             </div> <div lang="en">
+	 * 
 	 * @param component
 	 * @throws Exception
-	 * </div>
+	 *             </div>
 	 */
 	static public void resetComponent(Component component) throws Exception {
 		try {
-			logger.info("resetComponent:" + component.get(Component.INSTANCE_NAME));
+			logger.info("resetComponent:"
+					+ component.get(Component.INSTANCE_NAME));
 			RTObject obj = findComponent(component);
 
 			ExecutionContextListHolder ecListHolder = new ExecutionContextListHolder();
 			ecListHolder.value = new RTC.ExecutionContext[1];
 			ecListHolder.value = obj.get_owned_contexts();
-			LifeCycleState currentState = ecListHolder.value[0].get_component_state(obj);
-			if(!currentState.equals(LifeCycleState.ERROR_STATE)) {
-				
+			LifeCycleState currentState = ecListHolder.value[0]
+					.get_component_state(obj);
+			if (!currentState.equals(LifeCycleState.ERROR_STATE)) {
+
 				// TODO: Invalid pre-state
-				
-				return ;
+
+				return;
 			}
-			
-			
+
 			ecListHolder.value[0].reset_component(obj);
 			LifeCycleState state;
 			do {
@@ -818,7 +932,7 @@ public class RTSystemBuilder {
 			e.printStackTrace();
 		}
 	}
-	
-	
+
+
 
 }

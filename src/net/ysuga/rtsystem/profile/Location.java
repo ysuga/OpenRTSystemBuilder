@@ -19,20 +19,44 @@ import org.w3c.dom.Node;
  */
 public class Location extends RTSProperties {
  
+	
+	/**
+	 * 
+	 */
+	private static final String RTS_EXT_HEIGHT = "rtsExt:height";
+
+	/**
+	 * 
+	 */
+	private static final String RTS_EXT_WIDTH = "rtsExt:width";
+
+	/**
+	 * 
+	 */
+	private static final String RTS_EXT_DIRECTION = "rtsExt:direction";
+
+	public static String RTS_EXT_X = "rtsExt:x";
+
+	public static String RTS_EXT_Y = "rtsExt:y";
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	 
+	
+	public Location() {
+		this(0, 0, 80, 80);
+	}
+	
 	/**
 	 * Constructor
 	 */
 	public Location(int x, int y, int width, int height) {
-		put("rtsExt:direction", "RIGHT");
-		put("rtsExt:width", Integer.toString(width));
-		put("rtsExt:height", Integer.toString(height));
-		put("rtsExt:y", Integer.toString(y));
-		put("rtsExt:x", Integer.toString(x));
+		put(RTS_EXT_DIRECTION, "RIGHT");
+		put(RTS_EXT_WIDTH, Integer.toString(width));
+		put(RTS_EXT_HEIGHT, Integer.toString(height));
+		put(RTS_EXT_Y, Integer.toString(y));
+		put(RTS_EXT_X, Integer.toString(x));
 	}
 		
 	/**

@@ -7,6 +7,7 @@
 
 package net.ysuga.rtsystem.profile;
 
+import java.awt.Point;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -86,6 +87,31 @@ public class Component extends RTSProperties {
 	 *
 	 */
 	public class DataPort extends RTSProperties {
+		
+		
+		
+		/**
+		 * 
+		 */
+		public static final String RTS_NAME = "rts:name";
+		/**
+		 * 
+		 */
+		public static final String XSI_TYPE = "xsi:type";
+
+		public static final int DIRECTION_IN = 0;
+		public static final int DIRECTION_OUT = 1;
+		public static final int DIRECTION_UNKNOWN = 2;
+		
+		private int direction = DIRECTION_UNKNOWN;
+		public void setDirection(int direction) {
+			this.direction = direction;
+		}
+		
+		public int getDirection() {
+			return direction;
+		}
+		
 		/**
 		 * 
 		 */
@@ -95,8 +121,8 @@ public class Component extends RTSProperties {
 		 * Constructor
 		 */
 		public DataPort(String name) {
-			put("xsi:type", "rtsExt:dataport_ext");
-			put("rts:name", name);
+			put(XSI_TYPE, "rtsExt:dataport_ext");
+			put(RTS_NAME, name);
 		}
 		
 		/**
@@ -124,6 +150,9 @@ public class Component extends RTSProperties {
 		this("defaultInstanceName", "defaultPathUri",
 				"defaultId", "default", 
 				true, "None");
+		this.location = new Location();
+		
+		setState(OFFLINE);
 	}
 	/**
 	 * Constructor
@@ -216,6 +245,21 @@ public class Component extends RTSProperties {
 	
 	public void configure() throws Exception {
 		RTSystemBuilder.configureComponent(this);
+	}
+	/**
+	 * setLocation
+	 * <div lang="ja">
+	 * 
+	 * @param point
+	 * </div>
+	 * <div lang="en">
+	 *
+	 * @param point
+	 * </div>
+	 */
+	public void setLocation(Point point) {
+		this.location.put(Location.RTS_EXT_X, Integer.toString(point.x));
+		this.location.put(Location.RTS_EXT_Y, Integer.toString(point.y));
 	}
 	
 }
