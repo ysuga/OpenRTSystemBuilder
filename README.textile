@@ -1,25 +1,29 @@
 h1. OpenRTSystemBuilder
 
-*Author: Yuki Suga
-*E-mail: ysuga at ysuga.net
-*Date  : since 2011/08/05
+* Author: Yuki Suga
+* E-mail: ysuga at ysuga.net
+* Date  : since 2011/08/05
 
 h2. Contents
 
-*Objective & Goal
-*Characteristics
-*Target System and Dependency
-*Usage and References
-*Link
+* Objective & Goal
+* Characteristics
+* Target System and Dependency
+* Usage and References
+* Link
 
 h2. Objective & Goal
 
-My goal is to create easy-access RTSystemProfile library.
+My goal is to create easy-accessable RTSystemProfile library.
+This also includes NamingService library.
+
+This library encapsulate some complicated process. Please see RTSystemBuilder.java.
+Compiling JavaDoc also help you a lot!
 
 h2. Characteristics
 
-OpenRTSystemBuilder allows you to read / write RTSytemProfile.
-OpenRTSystemBuilder also enables to build/activate /deactivate/reset/destroy RT-System on-line.
+* OpenRTSystemBuilder allows you to read / write RTSytemProfile.
+* OpenRTSystemBuilder also enables to build/activate /deactivate/reset/destroy RT-System on-line.
 
 h2. Target System and Dependency
 
@@ -29,10 +33,13 @@ OpenRTM-aist 1.0 Java: http://www.openrtm.org/
 
 h2. Usage and References
 
-Download all dependencies.
+* Download all dependencies. I usually place OpenRTM-aist(Java) in HOME directory. In this environment, I can access OpenRTM-aist-1.0.jar by /home/$(user_name)/OpenRTM-aist/1.0/jar/OpenRTM-aist-1.0.jar
+* Import existing Eclipse Project.
+* Define RTM_JAVA_ROOT Class path Variables in Eclipse (Menu > Window > Preferences > Java > Build Path > Classpath Variables) I usually use $(HOME)/OpenRTM-aist/1.0/jar as RTM_JAVA_ROOT.
+* Enjoy.
 
 h2. Link
 
-*OpenRTM-aist : http://www.openrtm.org
-*Developers Page : http://www.ysuga.net
+* OpenRTM-aist : http://www.openrtm.org
+* Developers Page : http://www.ysuga.net
 

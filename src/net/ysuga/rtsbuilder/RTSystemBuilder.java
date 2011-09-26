@@ -35,18 +35,6 @@ import _SDOPackage.NameValue;
  * @author ysuga
  *
  */
-/**
- * @author ysuga
- *
- */
-/**
- * @author ysuga
- *
- */
-/**
- * @author ysuga
- * 
- */
 public class RTSystemBuilder {
 	static private Logger logger;
 
@@ -58,20 +46,17 @@ public class RTSystemBuilder {
 	}
 
 	/**
-	 * 
-	 * <div lang="ja"> ƒRƒ“ƒXƒgƒ‰ƒNƒ^ </div> <div lang="en"> Constructor </div>
+	 *  Constructor 
 	 */
 	public RTSystemBuilder() {
 
 	}
 
 	/**
-	 * <div lang="ja"> ƒvƒƒtƒ@ƒCƒ‹“à‚ÌRTƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‘¶İŠm”F
-	 * 
+	 * Search RTCs in RT System Profile.
+	 *  This function just searches RTCs and return true if success.
 	 * @param rtSystemProfile
-	 * @return ‚·‚×‚Ä‘¶İ‚È‚çtrue </div> <div lang="en">
-	 * @param rtSystemProfile
-	 * @return </div>
+	 * @return true if all RTCs are found 
 	 */
 	static public boolean searchRTCs(RTSystemProfile rtSystemProfile) {
 		boolean ret = false;
@@ -104,13 +89,8 @@ public class RTSystemBuilder {
 		}
 	}
 	/**
-	 * 
-	 * <div lang="ja"> RTƒVƒXƒeƒ€‚Ì\’z
-	 * 
+	 * Configure All RTCs in RTS profile.
 	 * @param rtSystemProfile
-	 *            </div> <div lang="en">
-	 * @param rtSystemProfile
-	 *            </div>
 	 */
 	static public void configure(RTSystemProfile rtSystemProfile) {
 		logger.info("configure:" + rtSystemProfile.get(RTSystemProfile.ID));
@@ -125,7 +105,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> RTƒVƒXƒeƒ€‚Ì\’z
+	 * <div lang="ja"> RTï¿½Vï¿½Xï¿½eï¿½ï¿½ï¿½Ì\ï¿½z
 	 * 
 	 * @param rtSystemProfile
 	 *            </div> <div lang="en">
@@ -146,7 +126,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> RTƒRƒ“ƒ|[ƒlƒ“ƒg‚ÌƒRƒ“ƒtƒBƒOƒŒ[ƒVƒ‡ƒ“
+	 * <div lang="ja"> RTï¿½Rï¿½ï¿½ï¿½|ï¿½[ï¿½lï¿½ï¿½ï¿½gï¿½ÌƒRï¿½ï¿½ï¿½tï¿½Bï¿½Oï¿½ï¿½ï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½
 	 * 
 	 * @param component
 	 * @throws Exception
@@ -185,7 +165,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> RTƒVƒXƒeƒ€‚Ì”j‰óDƒvƒƒtƒ@ƒCƒ‹‚É“o˜^‚³‚ê‚Ä‚¢‚é‚·‚×‚Ä‚ÌÚ‘±‚ğ‰ğœ
+	 * <div lang="ja"> RTï¿½Vï¿½Xï¿½eï¿½ï¿½ï¿½Ì”jï¿½ï¿½Dï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½É“oï¿½^ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚·ï¿½×‚Ä‚ÌÚ‘ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * 
 	 * @param rtSystemProfile
 	 *            </div> <div lang="en">
@@ -207,7 +187,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> ƒvƒƒtƒ@ƒCƒ‹‚É“o˜^‚³‚ê‚Ä‚¢‚é‚·‚×‚Ä‚ÌRTƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‚Âƒ|[ƒg‚ÌƒRƒlƒNƒVƒ‡ƒ“‚ğíœ
+	 * <div lang="ja"> ï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½É“oï¿½^ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚·ï¿½×‚Ä‚ï¿½RTï¿½Rï¿½ï¿½ï¿½|ï¿½[ï¿½lï¿½ï¿½ï¿½gï¿½Ìï¿½ï¿½Âƒ|ï¿½[ï¿½gï¿½ÌƒRï¿½lï¿½Nï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½íœ
 	 * 
 	 * @param rtSystemProfile
 	 *            </div> <div lang="en">
@@ -229,7 +209,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> ƒRƒ“ƒ|[ƒlƒ“ƒg‚Ì‚·‚×‚Ä‚ÌÚ‘±‚ğíœ
+	 * <div lang="ja"> ï¿½Rï¿½ï¿½ï¿½|ï¿½[ï¿½lï¿½ï¿½ï¿½gï¿½Ì‚ï¿½ï¿½×‚Ä‚ÌÚ‘ï¿½ï¿½ï¿½ï¿½íœ
 	 * 
 	 * @param component
 	 *            </div> <div lang="en">
@@ -248,7 +228,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> ƒRƒlƒNƒ^[‚ğíœ
+	 * <div lang="ja"> ï¿½Rï¿½lï¿½Nï¿½^ï¿½[ï¿½ï¿½ï¿½íœ
 	 * 
 	 * @param connector
 	 * @throws Exception
@@ -275,7 +255,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> ƒRƒlƒNƒ^[‚ğì¬‚µ‚ÄÚ‘±‚ğÀŒ»
+	 * <div lang="ja"> ï¿½Rï¿½lï¿½Nï¿½^ï¿½[ï¿½ï¿½ï¿½ì¬ï¿½ï¿½ï¿½ÄÚ‘ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * 
 	 * @param connector
 	 * @throws Exception
@@ -346,7 +326,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> ƒvƒƒtƒ@ƒCƒ‹‚É“o˜^‚³‚ê‚Ä‚¢‚é‚·‚×‚Ä‚ÌRTC‚ğactivate
+	 * <div lang="ja"> ï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½É“oï¿½^ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚·ï¿½×‚Ä‚ï¿½RTCï¿½ï¿½activate
 	 * 
 	 * @param rtSystemProfile
 	 * @throws Exception
@@ -367,7 +347,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> ƒvƒƒtƒ@ƒCƒ‹‚É“o˜^‚³‚ê‚Ä‚¢‚é‚·‚×‚Ä‚ÌRTC‚ğdeactivate
+	 * <div lang="ja"> ï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½É“oï¿½^ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚·ï¿½×‚Ä‚ï¿½RTCï¿½ï¿½deactivate
 	 * 
 	 * @param rtSystemProfile
 	 * @throws Exception
@@ -388,7 +368,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> ƒvƒƒtƒ@ƒCƒ‹‚É“o˜^‚³‚ê‚Ä‚¢‚é‚·‚×‚Ä‚ÌRTC‚ğreset
+	 * <div lang="ja"> ï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½É“oï¿½^ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚·ï¿½×‚Ä‚ï¿½RTCï¿½ï¿½reset
 	 * 
 	 * @param rtSystemProfile
 	 * @throws Exception
@@ -441,7 +421,7 @@ public class RTSystemBuilder {
 		RTObject rtObject = getComponent(pathUri);
 		ComponentProfile profile;
 		try {
-			// TODO: ‚Ç‚¤‚â‚Á‚½‚çRTObject‚Ì—LŒø«‚ğˆÀ‘S‚ÉŒŸØ‚Å‚«‚é‚Ì‚©‚í‚©‚è‚Ü‚¹‚ñD
+			// TODO: ï¿½Ç‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½RTObjectï¿½Ì—Lï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Sï¿½ÉŒï¿½ï¿½Ø‚Å‚ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½í‚©ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½D
 			profile = rtObject.get_component_profile();
 		} catch (Exception ex) {
 			return null;
@@ -502,7 +482,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> Ú‘±ƒvƒƒtƒ@ƒCƒ‹‚Ìì¬
+	 * <div lang="ja"> ï¿½Ú‘ï¿½ï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½Ìì¬
 	 * 
 	 * @param componentSet
 	 * @param connectorProfile
@@ -642,7 +622,7 @@ public class RTSystemBuilder {
 	
 	/**
 	 * 
-	 * <div lang="ja"> URI‚©‚çƒRƒ“ƒ|[ƒlƒ“ƒg‚ğŒŸõ
+	 * <div lang="ja"> URIï¿½ï¿½ï¿½ï¿½Rï¿½ï¿½ï¿½|ï¿½[ï¿½lï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * 
 	 * @param pathUri
 	 * @return
@@ -686,7 +666,7 @@ public class RTSystemBuilder {
 		getComponent(component);
 	}
 	/**
-	 * <div lang="ja"> ƒRƒ“ƒ|[ƒlƒ“ƒgƒvƒƒtƒ@ƒCƒ‹‚©‚çRTObject‚ğŒŸõ
+	 * <div lang="ja"> ï¿½Rï¿½ï¿½ï¿½|ï¿½[ï¿½lï¿½ï¿½ï¿½gï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½RTObjectï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * 
 	 * @param component
 	 * @return
@@ -784,7 +764,7 @@ public class RTSystemBuilder {
 	}
 
 	/**
-	 * <div lang="ja"> ƒRƒ“ƒ|[ƒlƒ“ƒgƒvƒƒtƒ@ƒCƒ‹‚ÌRTC‚ğŒŸõ‚µC‘¦À‚Éó‘Ô‚ğæ“¾‚·‚é
+	 * <div lang="ja"> ï¿½Rï¿½ï¿½ï¿½|ï¿½[ï¿½lï¿½ï¿½ï¿½gï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½RTCï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½Éï¿½Ô‚ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½ï¿½
 	 * 
 	 * @param component
 	 * @return
@@ -803,7 +783,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> ƒRƒ“ƒ|[ƒlƒ“ƒgƒvƒƒtƒ@ƒCƒ‹‚©‚çRTObject‚ğŒŸõ‚µ‚Ä‘¦À‚Éactivate
+	 * <div lang="ja"> ï¿½Rï¿½ï¿½ï¿½|ï¿½[ï¿½lï¿½ï¿½ï¿½gï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½RTObjectï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‘ï¿½ï¿½ï¿½ï¿½ï¿½activate
 	 * 
 	 * @param component
 	 * @throws Exception
@@ -849,7 +829,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> ƒRƒ“ƒ|[ƒlƒ“ƒgƒvƒƒtƒ@ƒCƒ‹‚©‚çRTObject‚ğŒŸõ‚µ‚Ä‘¦À‚Édeactivate
+	 * <div lang="ja"> ï¿½Rï¿½ï¿½ï¿½|ï¿½[ï¿½lï¿½ï¿½ï¿½gï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½RTObjectï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‘ï¿½ï¿½ï¿½ï¿½ï¿½deactivate
 	 * 
 	 * @param component
 	 * @throws Exception
@@ -897,7 +877,7 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> ƒRƒ“ƒ|[ƒlƒ“ƒgƒvƒƒtƒ@ƒCƒ‹‚©‚çRTObject‚ğŒŸõ‚µ‚Ä‘¦À‚Éreset
+	 * <div lang="ja"> ï¿½Rï¿½ï¿½ï¿½|ï¿½[ï¿½lï¿½ï¿½ï¿½gï¿½vï¿½ï¿½ï¿½tï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½ï¿½RTObjectï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‘ï¿½ï¿½ï¿½ï¿½ï¿½reset
 	 * 
 	 * @param component
 	 * @throws Exception
