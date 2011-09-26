@@ -2,7 +2,7 @@
 import java.io.File;
 import java.util.Set;
 
-import net.ysuga.rtsbuilder.CorbaNamingParser;
+import net.ysuga.corbanaming.CorbaNamingParser;
 import net.ysuga.rtsystem.profile.Component;
 import net.ysuga.rtsystem.profile.Connector;
 import net.ysuga.rtsystem.profile.RTSystemProfile;
@@ -27,14 +27,14 @@ public class CorbaNamingParserTest {
 	 */
 	public static void main(String[] args) {
 		try {
-			CorbaNamingParser parser = new CorbaNamingParser("127.0.0.1");
-			Set<String> set = parser.getRTObjectPathUriSet();
+			//CorbaNamingParser parser = new CorbaNamingParser("127.0.0.1");
+			Set<String> set = CorbaNamingParser.getRTObjectPathUriSet("127.0.0.1");
 			System.out.println("Set = " + set);
 			
-			Set<Component> cset = parser.getRegisteredComponentSet();
+			Set<Component> cset = CorbaNamingParser.getRegisteredComponentSet("127.0.0.1");
 			System.out.println("Comp = " + cset);
 			
-			Set<Connector> conset = parser.getConnectorSet(cset);
+			Set<Connector> conset = CorbaNamingParser.getConnectorSet(cset);
 			System.out.println("Comp[" + conset.size() + "] = " + conset);
 			
 			RTSystemProfile myProfile = new RTSystemProfile("TestSystem", "ysuga_net", "0.1");

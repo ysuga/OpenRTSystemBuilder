@@ -77,7 +77,7 @@ public class RTSystemBuilder {
 		boolean ret = false;
 		for (Component component : rtSystemProfile.componentSet) {
 			try {
-				findComponent(component);
+				getComponent(component);
 			} catch (Exception e) {
 				ret = true;
 			}
@@ -158,7 +158,7 @@ public class RTSystemBuilder {
 	static public void configureComponent(Component component) throws Exception {
 		logger.info("configureComponent:"
 				+ component.get(Component.INSTANCE_NAME));
-		RTObject rtObject = findComponent(component);
+		RTObject rtObject = getComponent(component);
 
 		_SDOPackage.Configuration sdoConfiguration = rtObject
 				.get_configuration();
@@ -240,7 +240,7 @@ public class RTSystemBuilder {
 	 */
 	public static void clearAllConnection(Component component) throws Exception {
 		logger.info("clearAllConnection:" + component.get(Component.ID));
-		RTObject rtObject = findComponent(component);
+		RTObject rtObject = getComponent(component);
 		for (PortService portService : rtObject.get_ports()) {
 			portService.disconnect_all();
 		}
@@ -263,7 +263,7 @@ public class RTSystemBuilder {
 				+ connector.getSourceDataPortName() + "->"
 				+ connector.getTargetComponentInstanceName()
 				+ connector.getTargetDataPortName());
-		RTObject sourceRTObject = findComponent(connector
+		RTObject sourceRTObject = getComponent(connector
 				.getSourceComponentPathUri());
 		for (PortService portService : sourceRTObject.get_ports()) {
 			if (portService.get_port_profile().name.equals(connector
@@ -291,9 +291,9 @@ public class RTSystemBuilder {
 				+ connector.getTargetComponentInstanceName()
 				+ connector.getTargetDataPortName());
 
-		RTObject sourceRTObject = findComponent(connector
+		RTObject sourceRTObject = getComponent(connector
 				.getSourceComponentPathUri());
-		RTObject targetRTObject = findComponent(connector
+		RTObject targetRTObject = getComponent(connector
 				.getTargetComponentPathUri());
 
 		// Building Connector Profile
@@ -438,7 +438,7 @@ public class RTSystemBuilder {
 	 *             </div>
 	 */
 	static public Component createComponent(String pathUri) throws Exception {
-		RTObject rtObject = findComponent(pathUri);
+		RTObject rtObject = getComponent(pathUri);
 		ComponentProfile profile;
 		try {
 			// TODO: どうやったらRTObjectの有効性を安全に検証できるのかわかりません．
@@ -541,12 +541,12 @@ public class RTSystemBuilder {
 		RTObject sourceRTC = connectorProfile.ports[0].get_port_profile().owner;
 		RTObject targetRTC = connectorProfile.ports[1].get_port_profile().owner;
 		for (Component component : componentSet) {
-			if (findComponent(component).equals(sourceRTC)) {
+			if (getComponent(component).equals(sourceRTC)) {
 				sourcePathUri = component.get(Component.PATH_URI);
 			}
 		}
 		for (Component component : componentSet) {
-			if (findComponent(component).equals(targetRTC)) {
+			if (getComponent(component).equals(targetRTC)) {
 				targetPathUri = component.get(Component.PATH_URI);
 			}
 
@@ -583,9 +583,9 @@ public class RTSystemBuilder {
 				+ connector.getTargetComponentInstanceName()
 				+ connector.getTargetDataPortName());
 
-		RTObject sourceRTObject = findComponent(connector
+		RTObject sourceRTObject = getComponent(connector
 				.getSourceComponentPathUri());
-		RTObject targetRTObject = findComponent(connector
+		RTObject targetRTObject = getComponent(connector
 				.getTargetComponentPathUri());
 
 		// Building Connector Profile
@@ -636,6 +636,10 @@ public class RTSystemBuilder {
 		return null;
 	}
 	
+	static public void findComponent(String pathUri) throws Exception {
+		getComponent(pathUri);
+	}
+	
 	/**
 	 * 
 	 * <div lang="ja"> URIからコンポーネントを検索
@@ -650,8 +654,8 @@ public class RTSystemBuilder {
 	 * @throws Exception
 	 *             </div>
 	 */
-	static public RTC.RTObject findComponent(String pathUri) throws Exception {
-		logger.info("findComponent:" + pathUri);
+	static public RTC.RTObject getComponent(String pathUri) throws Exception {
+		logger.info("getComponent:" + pathUri);
 		StringTokenizer tokenizer = new StringTokenizer(pathUri, "/");
 		String namingURI = tokenizer.nextToken();
 		String compURI = pathUri.substring(namingURI.length() + 1);
@@ -678,6 +682,9 @@ public class RTSystemBuilder {
 		return rtObject;
 	}
 
+	static public void findComponent(Component component) throws Exception {
+		getComponent(component);
+	}
 	/**
 	 * <div lang="ja"> コンポーネントプロファイルからRTObjectを検索
 	 * 
@@ -691,10 +698,10 @@ public class RTSystemBuilder {
 	 * @throws Exception
 	 *             </div>
 	 */
-	static public RTC.RTObject findComponent(Component component)
+	static public RTC.RTObject getComponent(Component component)
 			throws Exception {
 		component.setState(RTSProperties.OFFLINE);
-		RTObject rtObject = findComponent(component.get(Component.PATH_URI));
+		RTObject rtObject = getComponent(component.get(Component.PATH_URI));
 		
 		component.setState(RTSProperties.ONLINE_UNKNOWN);
 		RTC.ExecutionContext[] ecs = rtObject.get_owned_contexts();
@@ -754,7 +761,7 @@ public class RTSystemBuilder {
 			throws Exception {
 		RTObject rtObject;
 		try {
-			rtObject = findComponent(pathUri);
+			rtObject = getComponent(pathUri);
 		} catch (Exception ex) {
 			logger.warning("Component(" + pathUri + ") cannot found");
 			return RTCCondition.NONE;
@@ -810,7 +817,7 @@ public class RTSystemBuilder {
 		try {
 			logger.info("activateComponent:"
 					+ component.get(Component.INSTANCE_NAME));
-			RTObject obj = findComponent(component);
+			RTObject obj = getComponent(component);
 
 			ExecutionContextListHolder ecListHolder = new ExecutionContextListHolder();
 			ecListHolder.value = new RTC.ExecutionContext[1];
@@ -857,7 +864,7 @@ public class RTSystemBuilder {
 		try {
 			logger.info("deactivateComponent:"
 					+ component.get(Component.INSTANCE_NAME));
-			RTObject obj = findComponent(component);
+			RTObject obj = getComponent(component);
 
 			ExecutionContextListHolder ecListHolder = new ExecutionContextListHolder();
 			ecListHolder.value = new RTC.ExecutionContext[1];
@@ -904,7 +911,7 @@ public class RTSystemBuilder {
 		try {
 			logger.info("resetComponent:"
 					+ component.get(Component.INSTANCE_NAME));
-			RTObject obj = findComponent(component);
+			RTObject obj = getComponent(component);
 
 			ExecutionContextListHolder ecListHolder = new ExecutionContextListHolder();
 			ecListHolder.value = new RTC.ExecutionContext[1];
