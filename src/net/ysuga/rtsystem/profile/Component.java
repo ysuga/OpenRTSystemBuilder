@@ -9,6 +9,7 @@ package net.ysuga.rtsystem.profile;
 
 import java.awt.Point;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,6 +19,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import RTC.PortInterfacePolarity;
 
 /**
  * Component
@@ -116,6 +119,10 @@ public class Component extends RTSProperties {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
+		
+		public static final int SERVICE_PORT = 10;
+		public static final int SERVICE_PROVIDER = 11;
+		public static final int SERVICE_CONSUMER = 12;
 
 		/**
 		 * Constructor
@@ -123,6 +130,7 @@ public class Component extends RTSProperties {
 		public DataPort(String name) {
 			put(XSI_TYPE, "rtsExt:dataport_ext");
 			put(RTS_NAME, name);
+			this.interfaceList = new ArrayList<Interface>();
 		}
 		
 		/**
@@ -143,6 +151,57 @@ public class Component extends RTSProperties {
 		 */
 		public Element getElement(String elementName, Document document) {
 			return createElement(elementName, document);
+		}
+
+		public class Interface {
+			final private int polarity;
+			public final static int POLARITY_PROVIDER = 0;
+			public final static int POLARITY_CONSUMER = 1;
+			
+			final private String interfaceTypeName;
+			final private String instanceName;
+			
+			public Interface(String type, String name, int polarity) {
+				this.interfaceTypeName = type;
+				this.instanceName = name;
+				this.polarity = polarity;
+			}
+			
+			final public String getName() {
+				return interfaceTypeName;
+			}
+			
+			final public String getInstanceName() {
+				return instanceName;
+			}
+			
+			final public int getPolarity() {
+				return polarity;
+			}
+		};
+		
+		private ArrayList<Interface> interfaceList;
+		
+		
+		final public Interface getInterfaceByName(String name) {
+			for(Interface iface : interfaceList) {
+				if(iface.getName().equals(name)) {
+					return iface;
+				}
+			}
+			return null;
+		}
+		/**
+		 * 
+		 * addInterface
+		 *
+		 * @param type_name
+		 * @param instance_name
+		 * @param polarity
+		 */
+		public void addInterface(String type_name, String instance_name,
+				PortInterfacePolarity polarity) {
+			interfaceList.add(new Interface(type_name, instance_name, polarity.value()));
 		}
 	}
 

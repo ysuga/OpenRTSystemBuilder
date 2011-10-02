@@ -16,7 +16,7 @@ import jp.go.aist.rtm.RTC.CorbaNaming;
 import jp.go.aist.rtm.RTC.util.ORBUtil;
 import net.ysuga.rtsbuilder.RTSystemBuilder;
 import net.ysuga.rtsystem.profile.Component;
-import net.ysuga.rtsystem.profile.Connector;
+import net.ysuga.rtsystem.profile.DataPortConnector;
 
 import org.omg.CosNaming.Binding;
 import org.omg.CosNaming.BindingIteratorHolder;
@@ -127,15 +127,15 @@ public class CorbaNamingParser {
 	}
 
 	/**
-	 * Q‰Á‚µ‚Ä‚¢‚éRTCŠÔ‚ÌÚ‘±‚Ì‚İ‚ğo—Í
+	 * ï¿½Qï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½RTCï¿½Ô‚ÌÚ‘ï¿½ï¿½Ì‚İ‚ï¿½ï¿½oï¿½ï¿½
 	 * 
 	 * @param componentSet
 	 * @return
 	 * @throws Exception
 	 */
-	public static Set<Connector> getConnectorSet(Set<Component> componentSet)
+	public static Set<DataPortConnector> getConnectorSet(Set<Component> componentSet)
 			throws Exception {
-		Set<Connector> connectorSet = new HashSet<Connector>();
+		Set<DataPortConnector> connectorSet = new HashSet<DataPortConnector>();
 
 		for (Component component : componentSet) {
 			RTObject sourceRTObject = RTSystemBuilder.getComponent(component);

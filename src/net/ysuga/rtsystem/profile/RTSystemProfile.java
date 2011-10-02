@@ -49,7 +49,7 @@ public class RTSystemProfile extends RTSProperties {
 
 	public Set<Component> componentSet;
 
-	public Set<Connector> connectorSet;
+	public Set<DataPortConnector> connectorSet;
 
 	protected String formatCalendar(Calendar calendar) {
 		MessageFormat mf = new MessageFormat(
@@ -70,7 +70,7 @@ public class RTSystemProfile extends RTSProperties {
 		put(VERSION, "0.2");
 		put(ID, "RTSystem:" + vendorName + ":" + systemName + ":" + version);
 		componentSet = new HashSet<Component>();
-		connectorSet = new HashSet<Connector>();
+		connectorSet = new HashSet<DataPortConnector>();
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class RTSystemProfile extends RTSProperties {
 			element.appendChild(component
 					.getElement("rts:Components", document));
 		}
-		for (Connector connector : connectorSet) {
+		for (DataPortConnector connector : connectorSet) {
 			element.appendChild(connector.getElement("rts:DataPortConnectors",
 					document));
 		}
@@ -126,7 +126,7 @@ public class RTSystemProfile extends RTSProperties {
 			if (node.getNodeName().equals("rts:Components")) {
 				addComponent(new Component(node));
 			} else if (node.getNodeName().equals("rts:DataPortConnectors")) {
-				addConnector(new Connector(node));
+				addConnector(new DataPortConnector(node));
 			}
 		}
 
@@ -203,7 +203,7 @@ public class RTSystemProfile extends RTSProperties {
 	 * 
 	 * @param connector
 	 */
-	public void addConnector(Connector connector) {
+	public void addConnector(DataPortConnector connector) {
 		connectorSet.add(connector);
 	}
 
@@ -212,7 +212,7 @@ public class RTSystemProfile extends RTSProperties {
 
 	}
 
-	public void removeConnector(Connector connector) {
+	public void removeConnector(DataPortConnector connector) {
 		connectorSet.remove(connector.get("rts:name"));
 	}
 
@@ -235,9 +235,9 @@ public class RTSystemProfile extends RTSProperties {
 	 * @param name
 	 * @return
 	 */
-	final public Connector getConnector(String name) {
-		for (Connector connector : connectorSet) {
-			if (connector.get(Connector.CONNECTOR_ID).equals(name)) {
+	final public DataPortConnector getConnector(String name) {
+		for (DataPortConnector connector : connectorSet) {
+			if (connector.get(DataPortConnector.CONNECTOR_ID).equals(name)) {
 				return connector;
 			}
 		}

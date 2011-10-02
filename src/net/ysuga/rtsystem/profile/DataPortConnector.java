@@ -22,7 +22,7 @@ import org.w3c.dom.NodeList;
  * @author ysuga
  *
  */
-public class Connector extends RTSProperties {
+public class DataPortConnector extends RTSProperties {
 
 	/**
 	 * 
@@ -55,6 +55,9 @@ public class Connector extends RTSProperties {
 	 * 
 	 */
 	private static final long serialVersionUID = 8324464900056590583L;
+
+
+	private static final String PUSH_INTERVAL = "rts:pushInterval";
 	
 	/**
 	 * Source Data Port
@@ -148,7 +151,7 @@ public class Connector extends RTSProperties {
 	/**
 	 * Constructor
 	 */
-	public Connector(String connectorId, String name, 
+	public DataPortConnector(String connectorId, String name, 
 			String dataType, String interfaceType, 
 			String dataflowType, String subscriptionType) {
 		super();
@@ -162,7 +165,22 @@ public class Connector extends RTSProperties {
 		put(DATA_TYPE, dataType);
 	}
 
-	public Connector() throws IOException {
+	public DataPortConnector(String connectorId, String name, 
+			String dataType, String interfaceType, 
+			String dataflowType, String subscriptionType, String pushInterval) {
+		super();
+		pivotList = new PivotList();
+		put(INTERFACE_TYPE, interfaceType);
+		put(DATAFLOW_TYPE, dataflowType);
+		put(SUBSCRIPTION_TYPE, subscriptionType);
+		put(NAME, name);
+		put(TYPE, "rtsExt:dataport_connector_ext");
+		put(CONNECTOR_ID, connectorId);
+		put(DATA_TYPE, dataType);
+		put(PUSH_INTERVAL, pushInterval);
+	}
+	
+	public DataPortConnector() throws IOException {
 		this("defaultConnectorId", "defaultName",
 				"defaultDataType", "defaultInterfaceType",
 				"defaultDataflowType", "defaultSubscriptionType");
@@ -172,7 +190,7 @@ public class Connector extends RTSProperties {
 	 * @param node XML node.
 	 * @throws IOException
 	 */
-	public Connector(Node node) throws IOException {
+	public DataPortConnector(Node node) throws IOException {
 		this();
 		load(node);
 		
@@ -205,7 +223,7 @@ public class Connector extends RTSProperties {
 
 	
 	public String getSourceComponentInstanceName() {
-		return sourceDataPort.get(Connector.DataPort.INSTANCE_NAME);
+		return sourceDataPort.get(DataPortConnector.DataPort.INSTANCE_NAME);
 	}
 	
 	public String getSourceComponentPathUri() {
@@ -213,7 +231,7 @@ public class Connector extends RTSProperties {
 	}
 	
 	public String getTargetComponentInstanceName() {
-		return targetDataPort.get(Connector.DataPort.INSTANCE_NAME);
+		return targetDataPort.get(DataPortConnector.DataPort.INSTANCE_NAME);
 	}
 
 	public String getTargetComponentPathUri() {
@@ -223,7 +241,7 @@ public class Connector extends RTSProperties {
 	 * @return
 	 */
 	public String getSourceDataPortName() {
-		return sourceDataPort.get(Connector.DataPort.PORT_NAME);
+		return sourceDataPort.get(DataPortConnector.DataPort.PORT_NAME);
 	}
 
 	/**
@@ -231,7 +249,7 @@ public class Connector extends RTSProperties {
 	 * @return
 	 */
 	public String getTargetDataPortName() {
-		return targetDataPort.get(Connector.DataPort.PORT_NAME);
+		return targetDataPort.get(DataPortConnector.DataPort.PORT_NAME);
 	}
 	
 	public void connect() throws Exception {
@@ -255,7 +273,7 @@ public class Connector extends RTSProperties {
 	 * </div>
 	 */
 	public PivotList getPivotList() {
-		// TODO é©ìÆê∂ê¨Ç≥ÇÍÇΩÉÅÉ\ÉbÉhÅEÉXÉ^Éu
+		// TODO ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÍÇΩÔøΩÔøΩÔøΩ\ÔøΩbÔøΩhÔøΩEÔøΩXÔøΩ^ÔøΩu
 		return pivotList;
 	}
 
@@ -271,7 +289,7 @@ public class Connector extends RTSProperties {
 	 * </div>
 	 */
 	public Point getSelectedPivot() {
-		// TODO é©ìÆê∂ê¨Ç≥ÇÍÇΩÉÅÉ\ÉbÉhÅEÉXÉ^Éu
+		// TODO ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÍÇΩÔøΩÔøΩÔøΩ\ÔøΩbÔøΩhÔøΩEÔøΩXÔøΩ^ÔøΩu
 		return selectedPivot;
 	}
 

@@ -1,6 +1,8 @@
 package net.ysuga.rtsbuilder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -12,9 +14,11 @@ import jp.go.aist.rtm.RTC.util.CORBA_SeqUtil;
 import jp.go.aist.rtm.RTC.util.NVUtil;
 import jp.go.aist.rtm.RTC.util.ORBUtil;
 import net.ysuga.rtsystem.profile.Component;
+import net.ysuga.rtsystem.profile.Component.DataPort;
+import net.ysuga.rtsystem.profile.Component.DataPort.Interface;
 import net.ysuga.rtsystem.profile.ConfigurationData;
 import net.ysuga.rtsystem.profile.ConfigurationSet;
-import net.ysuga.rtsystem.profile.Connector;
+import net.ysuga.rtsystem.profile.DataPortConnector;
 import net.ysuga.rtsystem.profile.ExecutionContext;
 import net.ysuga.rtsystem.profile.Location;
 import net.ysuga.rtsystem.profile.Properties;
@@ -26,6 +30,7 @@ import RTC.ConnectorProfile;
 import RTC.ConnectorProfileHolder;
 import RTC.ExecutionContextListHolder;
 import RTC.LifeCycleState;
+import RTC.PortInterfaceProfile;
 import RTC.PortService;
 import RTC.RTObject;
 import _SDOPackage.NVListHolder;
@@ -33,7 +38,7 @@ import _SDOPackage.NameValue;
 
 /**
  * @author ysuga
- *
+ * 
  */
 public class RTSystemBuilder {
 	static private Logger logger;
@@ -46,17 +51,18 @@ public class RTSystemBuilder {
 	}
 
 	/**
-	 *  Constructor 
+	 * Constructor
 	 */
 	public RTSystemBuilder() {
 
 	}
 
 	/**
-	 * Search RTCs in RT System Profile.
-	 *  This function just searches RTCs and return true if success.
+	 * Search RTCs in RT System Profile. This function just searches RTCs and
+	 * return true if success.
+	 * 
 	 * @param rtSystemProfile
-	 * @return true if all RTCs are found 
+	 * @return true if all RTCs are found
 	 */
 	static public boolean searchRTCs(RTSystemProfile rtSystemProfile) {
 		boolean ret = false;
@@ -69,27 +75,28 @@ public class RTSystemBuilder {
 		}
 		return ret;
 	}
+
 	/**
-	 * searchConnections
-	 * <div lang="ja">
+	 * searchConnections <div lang="ja">
 	 * 
 	 * @param rtSystemProfile
-	 * </div>
-	 * <div lang="en">
-	 *
+	 *            </div> <div lang="en">
+	 * 
 	 * @param rtSystemProfile
-	 * </div>
+	 *            </div>
 	 */
 	public static void searchConnections(RTSystemProfile rtSystemProfile) {
-		for (Connector connector : rtSystemProfile.connectorSet) {
+		for (DataPortConnector connector : rtSystemProfile.connectorSet) {
 			try {
 				findConnector(connector);
 			} catch (Exception e) {
 			}
 		}
 	}
+
 	/**
 	 * Configure All RTCs in RTS profile.
+	 * 
 	 * @param rtSystemProfile
 	 */
 	static public void configure(RTSystemProfile rtSystemProfile) {
@@ -115,7 +122,7 @@ public class RTSystemBuilder {
 	static public void buildConnection(RTSystemProfile rtSystemProfile) {
 		logger.info("buildConnection:"
 				+ rtSystemProfile.get(RTSystemProfile.ID));
-		for (Connector connector : rtSystemProfile.connectorSet) {
+		for (DataPortConnector connector : rtSystemProfile.connectorSet) {
 			try {
 				connect(connector);
 			} catch (Exception e) {
@@ -176,7 +183,7 @@ public class RTSystemBuilder {
 	static public void destroyRTSystem(RTSystemProfile rtSystemProfile) {
 		logger.info("destroyRTSystem:"
 				+ rtSystemProfile.get(RTSystemProfile.ID));
-		for (Connector connector : rtSystemProfile.connectorSet) {
+		for (DataPortConnector connector : rtSystemProfile.connectorSet) {
 			try {
 				disconnect(connector);
 			} catch (Exception e) {
@@ -187,7 +194,8 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> �v���t�@�C���ɓo�^����Ă��邷�ׂĂ�RT�R���|�[�l���g�̎��|�[�g�̃R�l�N�V�������폜
+	 * <div lang="ja">
+	 * �v���t�@�C���ɓo�^����Ă��邷�ׂĂ�RT�R���|�[�l���g�̎��|�[�g�̃R�l�N�V�������폜
 	 * 
 	 * @param rtSystemProfile
 	 *            </div> <div lang="en">
@@ -238,7 +246,7 @@ public class RTSystemBuilder {
 	 * @throws Exception
 	 *             </div>
 	 */
-	static public void disconnect(Connector connector) throws Exception {
+	static public void disconnect(DataPortConnector connector) throws Exception {
 		logger.info("disconnect:" + connector.getSourceComponentInstanceName()
 				+ connector.getSourceDataPortName() + "->"
 				+ connector.getTargetComponentInstanceName()
@@ -248,9 +256,20 @@ public class RTSystemBuilder {
 		for (PortService portService : sourceRTObject.get_ports()) {
 			if (portService.get_port_profile().name.equals(connector
 					.getSourceDataPortName())) {
-				portService.disconnect(connector.get(Connector.CONNECTOR_ID));
+				portService.disconnect(connector.get(DataPortConnector.CONNECTOR_ID));
 			}
 		}
+	}
+
+	static public PortService getPortService(Component component,
+			String portName) throws Exception {
+		RTObject sourceRTObject = getComponent(component);
+		for (PortService portService : sourceRTObject.get_ports()) {
+			if (portService.get_port_profile().name.equals(portName)) {
+				return portService;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -265,7 +284,7 @@ public class RTSystemBuilder {
 	 * @throws Exception
 	 *             </div>
 	 */
-	static public void connect(Connector connector) throws Exception {
+	static public void connect(DataPortConnector connector) throws Exception {
 		logger.info("connect:" + connector.getSourceComponentInstanceName()
 				+ connector.getSourceDataPortName() + "->"
 				+ connector.getTargetComponentInstanceName()
@@ -278,8 +297,8 @@ public class RTSystemBuilder {
 
 		// Building Connector Profile
 		ConnectorProfile prof = new ConnectorProfile();
-		prof.connector_id = connector.get(Connector.CONNECTOR_ID);
-		prof.name = connector.get(Connector.NAME);
+		prof.connector_id = connector.get(DataPortConnector.CONNECTOR_ID);
+		prof.name = connector.get(DataPortConnector.NAME);
 		prof.ports = new PortService[2];
 
 		for (PortService portService : sourceRTObject.get_ports()) {
@@ -305,15 +324,15 @@ public class RTSystemBuilder {
 		CORBA_SeqUtil.push_back(
 				nvholder,
 				NVUtil.newNVString("dataport.interface_type",
-						connector.get(Connector.INTERFACE_TYPE)));
+						connector.get(DataPortConnector.INTERFACE_TYPE)));
 		CORBA_SeqUtil.push_back(
 				nvholder,
 				NVUtil.newNVString("dataport.dataflow_type",
-						connector.get(Connector.DATAFLOW_TYPE)));
+						connector.get(DataPortConnector.DATAFLOW_TYPE)));
 		CORBA_SeqUtil.push_back(
 				nvholder,
 				NVUtil.newNVString("dataport.subscription_type",
-						connector.get(Connector.SUBSCRIPTION_TYPE)));
+						connector.get(DataPortConnector.SUBSCRIPTION_TYPE)));
 		prof.properties = nvholder.value;
 
 		ConnectorProfileHolder proflist = new ConnectorProfileHolder();
@@ -496,7 +515,7 @@ public class RTSystemBuilder {
 	 * @throws Exception
 	 *             </div>
 	 */
-	static public Connector createConnector(Set<Component> componentSet,
+	static public DataPortConnector createConnector(Set<Component> componentSet,
 			ConnectorProfile connectorProfile) throws Exception {
 		String connectorId, name, dataType = "";
 		String interfaceType = "", dataflowType = "", subscriptionType = "";
@@ -514,7 +533,7 @@ public class RTSystemBuilder {
 			}
 		}
 
-		Connector connector = new Connector(connectorId, name, dataType,
+		DataPortConnector connector = new DataPortConnector(connectorId, name, dataType,
 				interfaceType, dataflowType, subscriptionType);
 
 		String sourcePathUri = null, targetPathUri = null;
@@ -556,9 +575,11 @@ public class RTSystemBuilder {
 		return connector;
 	}
 
-	static public ConnectorProfile findConnector(Connector connector) throws Exception {
-		
-		logger.info("findConnector:" + connector.getSourceComponentInstanceName()
+	static public ConnectorProfile findConnector(DataPortConnector connector)
+			throws Exception {
+
+		logger.info("findConnector:"
+				+ connector.getSourceComponentInstanceName()
 				+ connector.getSourceDataPortName() + "->"
 				+ connector.getTargetComponentInstanceName()
 				+ connector.getTargetDataPortName());
@@ -570,8 +591,8 @@ public class RTSystemBuilder {
 
 		// Building Connector Profile
 		ConnectorProfile prof = new ConnectorProfile();
-		prof.connector_id = connector.get(Connector.CONNECTOR_ID);
-		prof.name = connector.get(Connector.NAME);
+		prof.connector_id = connector.get(DataPortConnector.CONNECTOR_ID);
+		prof.name = connector.get(DataPortConnector.NAME);
 		prof.ports = new PortService[2];
 
 		for (PortService portService : sourceRTObject.get_ports()) {
@@ -589,37 +610,39 @@ public class RTSystemBuilder {
 		if (prof.ports[0] == null || prof.ports[1] == null) {
 			throw new Exception("Invalid RTS Profile");
 		}
-		
+
 		ConnectorProfile[] con_pros = prof.ports[0].get_connector_profiles();
-		for(ConnectorProfile con_prof : con_pros) {
-			if(/*con_prof.connector_id.equals(connector.get(Connector.CONNECTOR_ID)) &&*/
-					con_prof.name.equals(connector.get(Connector.NAME))
-					&&
-					(con_prof.ports[0].get_port_profile().name.equals(connector.getSourceDataPortName()) ||
-							con_prof.ports[0].get_port_profile().name.equals(connector.getTargetDataPortName())) &&
-					(con_prof.ports[1].get_port_profile().name.equals(connector.getSourceDataPortName()) ||
-							con_prof.ports[1].get_port_profile().name.equals(connector.getTargetDataPortName()))
-					) {
-				
-				
+		for (ConnectorProfile con_prof : con_pros) {
+			if (/*
+				 * con_prof.connector_id.equals(connector.get(Connector.CONNECTOR_ID
+				 * )) &&
+				 */
+			con_prof.name.equals(connector.get(DataPortConnector.NAME))
+					&& (con_prof.ports[0].get_port_profile().name
+							.equals(connector.getSourceDataPortName()) || con_prof.ports[0]
+							.get_port_profile().name.equals(connector
+							.getTargetDataPortName()))
+					&& (con_prof.ports[1].get_port_profile().name
+							.equals(connector.getSourceDataPortName()) || con_prof.ports[1]
+							.get_port_profile().name.equals(connector
+							.getTargetDataPortName()))) {
+
 				connector.setState(RTSProperties.ONLINE_ACTIVE);
-				
-				
+
 				return con_prof;
 			}
-							
+
 		}
-		
+
 		connector.setState(RTSProperties.OFFLINE);
-		
-		
+
 		return null;
 	}
-	
+
 	static public void findComponent(String pathUri) throws Exception {
 		getComponent(pathUri);
 	}
-	
+
 	/**
 	 * 
 	 * <div lang="ja"> URI����R���|�[�l���g������
@@ -665,6 +688,7 @@ public class RTSystemBuilder {
 	static public void findComponent(Component component) throws Exception {
 		getComponent(component);
 	}
+
 	/**
 	 * <div lang="ja"> �R���|�[�l���g�v���t�@�C������RTObject������
 	 * 
@@ -682,7 +706,7 @@ public class RTSystemBuilder {
 			throws Exception {
 		component.setState(RTSProperties.OFFLINE);
 		RTObject rtObject = getComponent(component.get(Component.PATH_URI));
-		
+
 		component.setState(RTSProperties.ONLINE_UNKNOWN);
 		RTC.ExecutionContext[] ecs = rtObject.get_owned_contexts();
 		LifeCycleState state = ecs[0].get_component_state(rtObject);
@@ -695,8 +719,7 @@ public class RTSystemBuilder {
 		} else if (state.equals(LifeCycleState.ERROR_STATE)) {
 			component.setState(RTSProperties.ONLINE_ERROR);
 		}
-		
-		
+
 		for (Component.DataPort dataPort : (Set<Component.DataPort>) component.dataPortSet) {
 			if (dataPort.getDirection() == Component.DataPort.DIRECTION_UNKNOWN) {
 				PortService[] portServices = rtObject.get_ports();
@@ -706,14 +729,21 @@ public class RTSystemBuilder {
 						for (NameValue profile : portServices[i]
 								.get_port_profile().properties) {
 							if (profile.name.equals("port.port_type")) {
-								if (profile.value.extract_wstring().equals(
-										"DataInPort")) {
+								String port_type = profile.value
+										.extract_string();
+								if (port_type.equals("DataInPort")) {
 									dataPort.setDirection(Component.DataPort.DIRECTION_IN);
-								} else if (profile.value.extract_wstring().equals(
-										"DataOutPort")) {
+								} else if (port_type.equals("DataOutPort")) {
 									dataPort.setDirection(Component.DataPort.DIRECTION_OUT);
+								} else if (port_type.equals("CorbaPort")) {
+									dataPort.setDirection(Component.DataPort.SERVICE_PORT);
 								}
 							}
+						}
+						for (PortInterfaceProfile prof : portServices[i]
+								.get_port_profile().interfaces) {
+							dataPort.addInterface(prof.type_name,
+									prof.instance_name, prof.polarity);
 						}
 
 					}
@@ -783,7 +813,8 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> �R���|�[�l���g�v���t�@�C������RTObject���������đ�����activate
+	 * <div lang="ja">
+	 * �R���|�[�l���g�v���t�@�C������RTObject���������đ�����activate
 	 * 
 	 * @param component
 	 * @throws Exception
@@ -813,15 +844,13 @@ public class RTSystemBuilder {
 			}
 
 			ecListHolder.value[0].activate_component(obj);
-			LifeCycleState state;
-			do {
-				try {
-					Thread.sleep(10);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-				state = ecListHolder.value[0].get_component_state(obj);
-			} while (!state.equals(LifeCycleState.ACTIVE_STATE));
+
+			/**
+			 * LifeCycleState state; do { try { Thread.sleep(10); } catch
+			 * (Exception ex) { ex.printStackTrace(); } state =
+			 * ecListHolder.value[0].get_component_state(obj); } while
+			 * (!state.equals(LifeCycleState.ACTIVE_STATE));
+			 */
 		} catch (org.omg.CORBA.COMM_FAILURE e) {
 			e.printStackTrace();
 		}
@@ -829,7 +858,8 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> �R���|�[�l���g�v���t�@�C������RTObject���������đ�����deactivate
+	 * <div lang="ja">
+	 * �R���|�[�l���g�v���t�@�C������RTObject���������đ�����deactivate
 	 * 
 	 * @param component
 	 * @throws Exception
@@ -861,15 +891,12 @@ public class RTSystemBuilder {
 
 			ecListHolder.value[0].deactivate_component(obj);
 
-			LifeCycleState state;
-			do {
-				try {
-					Thread.sleep(10);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-				state = ecListHolder.value[0].get_component_state(obj);
-			} while (!state.equals(LifeCycleState.INACTIVE_STATE));
+			/**
+			 * LifeCycleState state; do { try { Thread.sleep(10); } catch
+			 * (Exception ex) { ex.printStackTrace(); } state =
+			 * ecListHolder.value[0].get_component_state(obj); } while
+			 * (!state.equals(LifeCycleState.INACTIVE_STATE));
+			 */
 		} catch (org.omg.CORBA.COMM_FAILURE e) {
 			e.printStackTrace();
 		}
@@ -877,7 +904,8 @@ public class RTSystemBuilder {
 
 	/**
 	 * 
-	 * <div lang="ja"> �R���|�[�l���g�v���t�@�C������RTObject���������đ�����reset
+	 * <div lang="ja">
+	 * �R���|�[�l���g�v���t�@�C������RTObject���������đ�����reset
 	 * 
 	 * @param component
 	 * @throws Exception
@@ -906,20 +934,127 @@ public class RTSystemBuilder {
 			}
 
 			ecListHolder.value[0].reset_component(obj);
-			LifeCycleState state;
-			do {
-				try {
-					Thread.sleep(10);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-				state = ecListHolder.value[0].get_component_state(obj);
-			} while (!state.equals(LifeCycleState.INACTIVE_STATE));
+			/**
+			 * LifeCycleState state; do { try { Thread.sleep(10); } catch
+			 * (Exception ex) { ex.printStackTrace(); } state =
+			 * ecListHolder.value[0].get_component_state(obj); } while
+			 * (!state.equals(LifeCycleState.INACTIVE_STATE));
+			 */
 		} catch (org.omg.CORBA.COMM_FAILURE e) {
 			e.printStackTrace();
 		}
 	}
 
+	static public String getDataType(Component component,
+			Component.DataPort dataPort) throws Exception {
+		RTObject rtObject = RTSystemBuilder.getComponent(component);
+		PortService port = getPortService(component,
+				dataPort.get(DataPort.RTS_NAME));
+		if (port != null) {
+			for (NameValue nv : port.get_port_profile().properties) {
+				if (nv.name.equals("dataport.data_type")) {
+					return nv.value.extract_string();
+				}
+			}
+		}
+		return null;
+	}
 
+	static public boolean isProvider(Component component,
+			Component.DataPort dataPort) throws Exception {
+		PortService port = getPortService(component,
+				dataPort.get(DataPort.RTS_NAME));
+		if (port != null) {
 
+			for (PortInterfaceProfile prof : port.get_port_profile().interfaces) {
+				return prof.polarity.value() == 0;
+			}
+		}
+		return false;
+	}
+
+	static public boolean isConsumer(Component component,
+			Component.DataPort dataPort) throws Exception {
+		PortService port = getPortService(component,
+				dataPort.get(DataPort.RTS_NAME));
+		if (port != null) {
+
+			for (PortInterfaceProfile prof : port.get_port_profile().interfaces) {
+				return prof.polarity.value() == 1;
+			}
+		}
+		return false;
+	}
+
+	static public List<String> getInterfaceName(Component component,
+			Component.DataPort dataPort) throws Exception {
+		ArrayList inList = new ArrayList<String>();
+		PortService port = getPortService(component,
+				dataPort.get(DataPort.RTS_NAME));
+		if (port != null) {
+			for (PortInterfaceProfile prof : port.get_port_profile().interfaces) {
+				inList.add(prof.type_name);
+			}
+		}
+		return inList;
+	}
+
+	static public boolean isConnectable(Component sourceComponent,
+			Component.DataPort sourceDataPort, Component targetComponent,
+			Component.DataPort targetDataPort) throws Exception {
+		boolean connectable = false;
+		String dataType = RTSystemBuilder.getDataType(sourceComponent,
+				sourceDataPort);
+		String targetDataType = RTSystemBuilder.getDataType(targetComponent,
+				targetDataPort);
+
+		if (dataType != null && dataType.equals(targetDataType)) {
+			// / if both ports are DataPort and if both ports' DataTypes are
+			// same
+			if ((sourceDataPort.getDirection() == Component.DataPort.DIRECTION_IN && targetDataPort
+					.getDirection() == Component.DataPort.DIRECTION_OUT)
+					|| (sourceDataPort.getDirection() == Component.DataPort.DIRECTION_OUT && targetDataPort
+							.getDirection() == Component.DataPort.DIRECTION_IN)) {
+				connectable = true; // Valid DataPort Connection.
+
+			}
+		} else if (dataType == null && targetDataType == null) { // ServicePortConnection
+			String interfaceName = RTSystemBuilder
+					.getConnectionServiceInterfaceName(sourceComponent,
+							sourceDataPort, targetComponent, targetDataPort);
+			if (interfaceName != null) {
+				Component.DataPort.Interface sourceInterface = sourceDataPort
+						.getInterfaceByName(interfaceName);
+				Component.DataPort.Interface targetInterface = targetDataPort
+						.getInterfaceByName(interfaceName);
+				if ((sourceInterface.getPolarity() == Interface.POLARITY_CONSUMER && targetInterface
+						.getPolarity() == Interface.POLARITY_PROVIDER)
+						|| (sourceInterface.getPolarity() == Interface.POLARITY_PROVIDER && targetInterface
+								.getPolarity() == Interface.POLARITY_CONSUMER)) {
+					connectable = true;
+				}
+
+			}
+		}
+		return connectable;
+	}
+
+	public static String getConnectionServiceInterfaceName(
+			Component sourceComponent, Component.DataPort sourceDataPort,
+			Component targetComponent, Component.DataPort targetDataPort)
+			throws Exception {
+		List<String> sourceInterfaceNameList = RTSystemBuilder
+				.getInterfaceName(sourceComponent, sourceDataPort);
+		List<String> targetInterfaceNameList = RTSystemBuilder
+				.getInterfaceName(targetComponent, targetDataPort);
+		for (String interfaceName : sourceInterfaceNameList) {
+			for (String targetInterfaceName : targetInterfaceNameList) {
+				if (interfaceName != null
+						&& interfaceName.equals(targetInterfaceName)) {
+					return interfaceName;
+				}
+			}
+		}
+		return null;
+	}
 }
