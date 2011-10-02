@@ -21,6 +21,7 @@ import net.ysuga.rtsystem.profile.ConfigurationSet;
 import net.ysuga.rtsystem.profile.DataPortConnector;
 import net.ysuga.rtsystem.profile.ExecutionContext;
 import net.ysuga.rtsystem.profile.Location;
+import net.ysuga.rtsystem.profile.PortConnector;
 import net.ysuga.rtsystem.profile.Properties;
 import net.ysuga.rtsystem.profile.RTSProperties;
 import net.ysuga.rtsystem.profile.RTSystemProfile;
@@ -86,7 +87,7 @@ public class RTSystemBuilder {
 	 *            </div>
 	 */
 	public static void searchConnections(RTSystemProfile rtSystemProfile) {
-		for (DataPortConnector connector : rtSystemProfile.connectorSet) {
+		for (DataPortConnector connector : rtSystemProfile.dataPortConnectorSet) {
 			try {
 				findConnector(connector);
 			} catch (Exception e) {
@@ -122,7 +123,14 @@ public class RTSystemBuilder {
 	static public void buildConnection(RTSystemProfile rtSystemProfile) {
 		logger.info("buildConnection:"
 				+ rtSystemProfile.get(RTSystemProfile.ID));
-		for (DataPortConnector connector : rtSystemProfile.connectorSet) {
+		for (DataPortConnector connector : rtSystemProfile.dataPortConnectorSet) {
+			try {
+				connect(connector);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		for (PortConnector connector : rtSystemProfile.servicePortConnectorSet) {
 			try {
 				connect(connector);
 			} catch (Exception e) {
@@ -183,7 +191,7 @@ public class RTSystemBuilder {
 	static public void destroyRTSystem(RTSystemProfile rtSystemProfile) {
 		logger.info("destroyRTSystem:"
 				+ rtSystemProfile.get(RTSystemProfile.ID));
-		for (DataPortConnector connector : rtSystemProfile.connectorSet) {
+		for (DataPortConnector connector : rtSystemProfile.dataPortConnectorSet) {
 			try {
 				disconnect(connector);
 			} catch (Exception e) {
@@ -248,15 +256,30 @@ public class RTSystemBuilder {
 	 */
 	static public void disconnect(DataPortConnector connector) throws Exception {
 		logger.info("disconnect:" + connector.getSourceComponentInstanceName()
-				+ connector.getSourceDataPortName() + "->"
+				+ connector.getSourcePortName() + "->"
 				+ connector.getTargetComponentInstanceName()
-				+ connector.getTargetDataPortName());
+				+ connector.getTargetPortName());
 		RTObject sourceRTObject = getComponent(connector
 				.getSourceComponentPathUri());
 		for (PortService portService : sourceRTObject.get_ports()) {
 			if (portService.get_port_profile().name.equals(connector
-					.getSourceDataPortName())) {
-				portService.disconnect(connector.get(DataPortConnector.CONNECTOR_ID));
+					.getSourcePortName())) {
+				portService.disconnect(connector.get(PortConnector.CONNECTOR_ID));
+			}
+		}
+	}
+	
+	static public void disconnect(PortConnector connector) throws Exception {
+		logger.info("disconnect:" + connector.getSourceComponentInstanceName()
+				+ connector.getSourcePortName() + "->"
+				+ connector.getTargetComponentInstanceName()
+				+ connector.getTargetPortName());
+		RTObject sourceRTObject = getComponent(connector
+				.getSourceComponentPathUri());
+		for (PortService portService : sourceRTObject.get_ports()) {
+			if (portService.get_port_profile().name.equals(connector
+					.getSourcePortName())) {
+				portService.disconnect(connector.get(PortConnector.CONNECTOR_ID));
 			}
 		}
 	}
@@ -286,9 +309,9 @@ public class RTSystemBuilder {
 	 */
 	static public void connect(DataPortConnector connector) throws Exception {
 		logger.info("connect:" + connector.getSourceComponentInstanceName()
-				+ connector.getSourceDataPortName() + "->"
+				+ connector.getSourcePortName() + "->"
 				+ connector.getTargetComponentInstanceName()
-				+ connector.getTargetDataPortName());
+				+ connector.getTargetPortName());
 
 		RTObject sourceRTObject = getComponent(connector
 				.getSourceComponentPathUri());
@@ -297,19 +320,19 @@ public class RTSystemBuilder {
 
 		// Building Connector Profile
 		ConnectorProfile prof = new ConnectorProfile();
-		prof.connector_id = connector.get(DataPortConnector.CONNECTOR_ID);
-		prof.name = connector.get(DataPortConnector.NAME);
+		prof.connector_id = connector.get(PortConnector.CONNECTOR_ID);
+		prof.name = connector.get(PortConnector.NAME);
 		prof.ports = new PortService[2];
 
 		for (PortService portService : sourceRTObject.get_ports()) {
 			if (portService.get_port_profile().name.equals(connector
-					.getSourceDataPortName())) {
+					.getSourcePortName())) {
 				prof.ports[1] = portService;
 			}
 		}
 		for (PortService portService : targetRTObject.get_ports()) {
 			if (portService.get_port_profile().name.equals(connector
-					.getTargetDataPortName())) {
+					.getTargetPortName())) {
 				prof.ports[0] = portService;
 			}
 		}
@@ -317,6 +340,68 @@ public class RTSystemBuilder {
 			throw new Exception("Invalid RTS Profile");
 		}
 
+		NVListHolder nvholder = new NVListHolder();
+		nvholder.value = prof.properties;
+		if (nvholder.value == null)
+			nvholder.value = new NameValue[0];
+		CORBA_SeqUtil.push_back(
+				nvholder,
+				NVUtil.newNVString("dataport.interface_type",
+						connector.get(PortConnector.INTERFACE_TYPE)));
+		CORBA_SeqUtil.push_back(
+				nvholder,
+				NVUtil.newNVString("dataport.dataflow_type",
+						connector.get(PortConnector.DATAFLOW_TYPE)));
+		CORBA_SeqUtil.push_back(
+				nvholder,
+				NVUtil.newNVString("dataport.subscription_type",
+						connector.get(PortConnector.SUBSCRIPTION_TYPE)));
+		prof.properties = nvholder.value;
+
+		ConnectorProfileHolder proflist = new ConnectorProfileHolder();
+		proflist.value = prof;
+
+		if (prof.ports[0].connect(proflist) != RTC.ReturnCode_t.RTC_OK) {
+			throw new Exception("Cannot Connect");
+		}
+	}
+
+	static public void connect(PortConnector connector) throws Exception {
+		// TODO:
+		logger.info("connect:" + connector.getSourceComponentInstanceName()
+				+ connector.getSourcePortName() + "->"
+				+ connector.getTargetComponentInstanceName()
+				+ connector.getTargetPortName());
+
+		RTObject sourceRTObject = getComponent(connector
+				.getSourceComponentPathUri());
+		RTObject targetRTObject = getComponent(connector
+				.getTargetComponentPathUri());
+
+		// Building Connector Profile
+		ConnectorProfile prof = new ConnectorProfile();
+		prof.connector_id = connector.get(PortConnector.CONNECTOR_ID);
+		prof.name = connector.get(PortConnector.NAME);
+		prof.ports = new PortService[2];
+
+		for (PortService portService : sourceRTObject.get_ports()) {
+			if (portService.get_port_profile().name.equals(connector
+					.getSourcePortName())) {
+				prof.ports[1] = portService;
+			}
+		}
+		
+		for (PortService portService : targetRTObject.get_ports()) {
+			if (portService.get_port_profile().name.equals(connector
+					.getTargetPortName())) {
+				prof.ports[0] = portService;
+			}
+		}
+		if (prof.ports[0] == null || prof.ports[1] == null) {
+			throw new Exception("Invalid RTS Profile");
+		}
+
+		/**
 		NVListHolder nvholder = new NVListHolder();
 		nvholder.value = prof.properties;
 		if (nvholder.value == null)
@@ -333,8 +418,9 @@ public class RTSystemBuilder {
 				nvholder,
 				NVUtil.newNVString("dataport.subscription_type",
 						connector.get(DataPortConnector.SUBSCRIPTION_TYPE)));
-		prof.properties = nvholder.value;
 
+		prof.properties = nvholder.value;
+						**/
 		ConnectorProfileHolder proflist = new ConnectorProfileHolder();
 		proflist.value = prof;
 
@@ -342,7 +428,6 @@ public class RTSystemBuilder {
 			throw new Exception("Cannot Connect");
 		}
 	}
-
 	/**
 	 * 
 	 * <div lang="ja"> �v���t�@�C���ɓo�^����Ă��邷�ׂĂ�RTC��activate
@@ -554,22 +639,22 @@ public class RTSystemBuilder {
 			throw new Exception();
 		}
 
-		connector.sourceDataPort = connector.new DataPort(
+		connector.sourcePort = connector.new Port(
 				connectorProfile.ports[0].get_port_profile().name,
 				connectorProfile.ports[0].get_port_profile().owner
 						.get_component_profile().instance_name,
 				RTSystemBuilder.buildComponentId(connectorProfile.ports[0]
 						.get_port_profile().owner));
-		connector.sourceDataPort.properties = new Properties(
+		connector.sourcePort.properties = new Properties(
 				"COMPONENT_PATH_ID", sourcePathUri);
 
-		connector.targetDataPort = connector.new DataPort(
+		connector.targetPort = connector.new Port(
 				connectorProfile.ports[1].get_port_profile().name,
 				connectorProfile.ports[1].get_port_profile().owner
 						.get_component_profile().instance_name,
 				RTSystemBuilder.buildComponentId(connectorProfile.ports[1]
 						.get_port_profile().owner));
-		connector.targetDataPort.properties = new Properties(
+		connector.targetPort.properties = new Properties(
 				"COMPONENT_PATH_ID", targetPathUri);
 
 		return connector;
@@ -580,9 +665,9 @@ public class RTSystemBuilder {
 
 		logger.info("findConnector:"
 				+ connector.getSourceComponentInstanceName()
-				+ connector.getSourceDataPortName() + "->"
+				+ connector.getSourcePortName() + "->"
 				+ connector.getTargetComponentInstanceName()
-				+ connector.getTargetDataPortName());
+				+ connector.getTargetPortName());
 
 		RTObject sourceRTObject = getComponent(connector
 				.getSourceComponentPathUri());
@@ -591,19 +676,19 @@ public class RTSystemBuilder {
 
 		// Building Connector Profile
 		ConnectorProfile prof = new ConnectorProfile();
-		prof.connector_id = connector.get(DataPortConnector.CONNECTOR_ID);
-		prof.name = connector.get(DataPortConnector.NAME);
+		prof.connector_id = connector.get(PortConnector.CONNECTOR_ID);
+		prof.name = connector.get(PortConnector.NAME);
 		prof.ports = new PortService[2];
 
 		for (PortService portService : sourceRTObject.get_ports()) {
 			if (portService.get_port_profile().name.equals(connector
-					.getSourceDataPortName())) {
+					.getSourcePortName())) {
 				prof.ports[1] = portService;
 			}
 		}
 		for (PortService portService : targetRTObject.get_ports()) {
 			if (portService.get_port_profile().name.equals(connector
-					.getTargetDataPortName())) {
+					.getTargetPortName())) {
 				prof.ports[0] = portService;
 			}
 		}
@@ -617,15 +702,15 @@ public class RTSystemBuilder {
 				 * con_prof.connector_id.equals(connector.get(Connector.CONNECTOR_ID
 				 * )) &&
 				 */
-			con_prof.name.equals(connector.get(DataPortConnector.NAME))
+			con_prof.name.equals(connector.get(PortConnector.NAME))
 					&& (con_prof.ports[0].get_port_profile().name
-							.equals(connector.getSourceDataPortName()) || con_prof.ports[0]
+							.equals(connector.getSourcePortName()) || con_prof.ports[0]
 							.get_port_profile().name.equals(connector
-							.getTargetDataPortName()))
+							.getTargetPortName()))
 					&& (con_prof.ports[1].get_port_profile().name
-							.equals(connector.getSourceDataPortName()) || con_prof.ports[1]
+							.equals(connector.getSourcePortName()) || con_prof.ports[1]
 							.get_port_profile().name.equals(connector
-							.getTargetDataPortName()))) {
+							.getTargetPortName()))) {
 
 				connector.setState(RTSProperties.ONLINE_ACTIVE);
 

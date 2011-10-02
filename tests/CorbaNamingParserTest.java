@@ -39,7 +39,7 @@ public class CorbaNamingParserTest {
 			
 			RTSystemProfile myProfile = new RTSystemProfile("TestSystem", "ysuga_net", "0.1");
 			myProfile.componentSet.addAll(cset);
-			myProfile.connectorSet.addAll(conset);
+			myProfile.dataPortConnectorSet.addAll(conset);
 			File testFile = new File("TestSystem.xml");
 			myProfile.save(testFile);
 

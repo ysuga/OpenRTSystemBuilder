@@ -7,6 +7,7 @@
 
 package net.ysuga.rtsystem.profile;
 
+import java.awt.Point;
 import java.io.IOException;
 
 import net.ysuga.rtsbuilder.RTSystemBuilder;
@@ -21,7 +22,7 @@ import org.w3c.dom.NodeList;
  * @author ysuga
  *
  */
-public class DataPortConnector extends PortConnector {
+public class ServicePortConnector extends PortConnector {
 
 	/**
 	 * 
@@ -32,55 +33,32 @@ public class DataPortConnector extends PortConnector {
 	/**
 	 * Constructor
 	 */
-	public DataPortConnector(String connectorId, String name, 
-			String dataType, String interfaceType, 
-			String dataflowType, String subscriptionType) {
+	public ServicePortConnector(String connectorId, String name) {
 		super();
 		pivotList = new PivotList();
-		put(INTERFACE_TYPE, interfaceType);
-		put(DATAFLOW_TYPE, dataflowType);
-		put(SUBSCRIPTION_TYPE, subscriptionType);
 		put(NAME, name);
-		put(TYPE, "rtsExt:dataport_connector_ext");
+		put(TYPE, "rtsExt:serviceport_connector_ex");
 		put(CONNECTOR_ID, connectorId);
-		put(DATA_TYPE, dataType);
 	}
 
-	public DataPortConnector(String connectorId, String name, 
-			String dataType, String interfaceType, 
-			String dataflowType, String subscriptionType, String pushInterval) {
-		super();
-		pivotList = new PivotList();
-		put(INTERFACE_TYPE, interfaceType);
-		put(DATAFLOW_TYPE, dataflowType);
-		put(SUBSCRIPTION_TYPE, subscriptionType);
-		put(NAME, name);
-		put(TYPE, "rtsExt:dataport_connector_ext");
-		put(CONNECTOR_ID, connectorId);
-		put(DATA_TYPE, dataType);
-		put(PUSH_INTERVAL, pushInterval);
-	}
-	
-	public DataPortConnector() throws IOException {
-		this("defaultConnectorId", "defaultName",
-				"defaultDataType", "defaultInterfaceType",
-				"defaultDataflowType", "defaultSubscriptionType");
+	public ServicePortConnector() throws IOException {
+		this("defaultConnectorId", "defaultName");
 	}
 	/**
 	 * Constructor
 	 * @param node XML node.
 	 * @throws IOException
 	 */
-	public DataPortConnector(Node node) throws IOException {
+	public ServicePortConnector(Node node) throws IOException {
 		this();
 		load(node);
 		
 		NodeList nodeList = node.getChildNodes();
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node cnode = nodeList.item(i);
-			if (cnode.getNodeName().equals("rts:sourceDataPort")) {
+			if (cnode.getNodeName().equals("rts:sourceServicePort")) {
 				sourcePort = new Port(cnode);
-			} else if (cnode.getNodeName().equals("rts:targetDataPort")) {
+			} else if (cnode.getNodeName().equals("rts:targetServicePort")) {
 				targetPort = new Port(cnode);
 			}
 		}
@@ -97,11 +75,12 @@ public class DataPortConnector extends PortConnector {
 	 */
 	public Element getElement(String elementName, Document document) {
 		Element element = createElement(elementName, document);
-		element.appendChild(sourcePort.getElement("rts:sourceDataPort", document));
-		element.appendChild(targetPort.getElement("rts:targetDataPort", document));
+		element.appendChild(sourcePort.getElement("rts:sourceServicePort", document));
+		element.appendChild(targetPort.getElement("rts:targetServicePort", document));
 		return element;
 	}
 
+	
 	public void connect() throws Exception {
 		RTSystemBuilder.connect(this);
 	}
@@ -109,5 +88,6 @@ public class DataPortConnector extends PortConnector {
 	public void disconnect() throws Exception {
 		RTSystemBuilder.disconnect(this);
 	}
+
 
 }

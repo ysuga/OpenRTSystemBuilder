@@ -49,7 +49,9 @@ public class RTSystemProfile extends RTSProperties {
 
 	public Set<Component> componentSet;
 
-	public Set<DataPortConnector> connectorSet;
+	public Set<DataPortConnector> dataPortConnectorSet;
+
+	public Set<ServicePortConnector> servicePortConnectorSet;
 
 	protected String formatCalendar(Calendar calendar) {
 		MessageFormat mf = new MessageFormat(
@@ -70,7 +72,8 @@ public class RTSystemProfile extends RTSProperties {
 		put(VERSION, "0.2");
 		put(ID, "RTSystem:" + vendorName + ":" + systemName + ":" + version);
 		componentSet = new HashSet<Component>();
-		connectorSet = new HashSet<DataPortConnector>();
+		dataPortConnectorSet = new HashSet<DataPortConnector>();
+		servicePortConnectorSet = new HashSet<ServicePortConnector>();
 	}
 
 	@Override
@@ -87,7 +90,7 @@ public class RTSystemProfile extends RTSProperties {
 			element.appendChild(component
 					.getElement("rts:Components", document));
 		}
-		for (DataPortConnector connector : connectorSet) {
+		for (PortConnector connector : dataPortConnectorSet) {
 			element.appendChild(connector.getElement("rts:DataPortConnectors",
 					document));
 		}
@@ -126,40 +129,35 @@ public class RTSystemProfile extends RTSProperties {
 			if (node.getNodeName().equals("rts:Components")) {
 				addComponent(new Component(node));
 			} else if (node.getNodeName().equals("rts:DataPortConnectors")) {
-				addConnector(new DataPortConnector(node));
+				addDataPortConnector(new DataPortConnector(node));
+			} else if (node.getNodeName().equals("rts:ServicePortConnectors")) {
+				addServicePortConnector(new ServicePortConnector(node));
 			}
 		}
 
 		/**
-		for (Component component : componentSet) {
-			for (Component.DataPort dataPort : component.dataPortSet) {
-				for (Connector connector : connectorSet) {
-					if (dataPort.get(Component.DataPort.RTS_NAME).equals(
-							connector.sourceDataPort
-									.get(Connector.DataPort.PORT_NAME))
-							&& component.get(Component.PATH_URI).equals(
-									connector.sourceDataPort.properties
-											.get(Properties.VALUE))) {
-						System.out.println(component.get(Component.PATH_URI) + dataPort.get(Component.DataPort.RTS_NAME) 
-								+ " is OutPort");
-						dataPort.setDirection(Component.DataPort.DIRECTION_OUT);
-					} else if (dataPort.get(Component.DataPort.RTS_NAME)
-							.equals(connector.targetDataPort
-									.get(Connector.DataPort.PORT_NAME))
-							&& component.get(Component.PATH_URI).equals(
-									connector.targetDataPort.properties
-											.get(Properties.VALUE))) {
-						System.out.println(component.get(Component.PATH_URI) + dataPort.get(Component.DataPort.RTS_NAME) 
-								+ " is InPort");
-						
-						dataPort.setDirection(Component.DataPort.DIRECTION_IN);
-					}
-
-				}
-
-			}
-		}
-		*/
+		 * for (Component component : componentSet) { for (Component.DataPort
+		 * dataPort : component.dataPortSet) { for (Connector connector :
+		 * connectorSet) { if (dataPort.get(Component.DataPort.RTS_NAME).equals(
+		 * connector.sourceDataPort .get(Connector.DataPort.PORT_NAME)) &&
+		 * component.get(Component.PATH_URI).equals(
+		 * connector.sourceDataPort.properties .get(Properties.VALUE))) {
+		 * System.out.println(component.get(Component.PATH_URI) +
+		 * dataPort.get(Component.DataPort.RTS_NAME) + " is OutPort");
+		 * dataPort.setDirection(Component.DataPort.DIRECTION_OUT); } else if
+		 * (dataPort.get(Component.DataPort.RTS_NAME)
+		 * .equals(connector.targetDataPort .get(Connector.DataPort.PORT_NAME))
+		 * && component.get(Component.PATH_URI).equals(
+		 * connector.targetDataPort.properties .get(Properties.VALUE))) {
+		 * System.out.println(component.get(Component.PATH_URI) +
+		 * dataPort.get(Component.DataPort.RTS_NAME) + " is InPort");
+		 * 
+		 * dataPort.setDirection(Component.DataPort.DIRECTION_IN); }
+		 * 
+		 * }
+		 * 
+		 * } }
+		 */
 
 	}
 
@@ -203,8 +201,8 @@ public class RTSystemProfile extends RTSProperties {
 	 * 
 	 * @param connector
 	 */
-	public void addConnector(DataPortConnector connector) {
-		connectorSet.add(connector);
+	public void addDataPortConnector(DataPortConnector connector) {
+		dataPortConnectorSet.add(connector);
 	}
 
 	public void removeComponent(RTSProperties component) {
@@ -212,8 +210,12 @@ public class RTSystemProfile extends RTSProperties {
 
 	}
 
-	public void removeConnector(DataPortConnector connector) {
-		connectorSet.remove(connector.get("rts:name"));
+	public void removeDataPortConnector(PortConnector connector) {
+		dataPortConnectorSet.remove(connector.get("rts:name"));
+	}
+
+	public void removeServicePortConnector(PortConnector connector) {
+		servicePortConnectorSet.remove(connector.get("rts:name"));
 	}
 
 	/**
@@ -235,13 +237,22 @@ public class RTSystemProfile extends RTSProperties {
 	 * @param name
 	 * @return
 	 */
-	final public DataPortConnector getConnector(String name) {
-		for (DataPortConnector connector : connectorSet) {
-			if (connector.get(DataPortConnector.CONNECTOR_ID).equals(name)) {
+	final public PortConnector getDataConnector(String name) {
+		for (PortConnector connector : dataPortConnectorSet) {
+			if (connector.get(PortConnector.CONNECTOR_ID).equals(name)) {
 				return connector;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * addServicePortConnector
+	 * 
+	 * @param connector
+	 */
+	public void addServicePortConnector(ServicePortConnector connector) {
+		this.servicePortConnectorSet.add(connector);
 	}
 
 }
