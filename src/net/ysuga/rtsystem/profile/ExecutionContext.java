@@ -23,6 +23,22 @@ public class ExecutionContext extends RTSProperties {
 	/**
 	 * 
 	 */
+	public static final String RTS_ID = "rts:id";
+	/**
+	 * 
+	 */
+	public static final String RTS_KIND = "rts:kind";
+	/**
+	 * 
+	 */
+	public static final String RTS_RATE = "rts:rate";
+	/**
+	 * 
+	 */
+	public static final String XSI_TYPE = "xsi:type";
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = -1753850415115620108L;
 
 	/**
@@ -41,10 +57,10 @@ public class ExecutionContext extends RTSProperties {
 	 */
 	public ExecutionContext(String id, String type, String kind, String rate) {
 		super();
-		put("xsi:type", type );
-		put("rts:rate", rate);
-		put("rts:kind", kind);
-		put("rts:id", id);
+		put(XSI_TYPE, type );
+		put(RTS_RATE, rate);
+		put(RTS_KIND, kind);
+		put(RTS_ID, id);
 	}
 
 	@Override

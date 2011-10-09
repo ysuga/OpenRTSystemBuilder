@@ -740,6 +740,24 @@ public class RTSystemBuilder {
 		getComponent(pathUri);
 	}
 
+	static public String getNamingUri(String pathUri) {
+		StringTokenizer tokenizer = new StringTokenizer(pathUri, "/");
+		String namingURI = tokenizer.nextToken();
+		String compURI = pathUri.substring(namingURI.length() + 1);
+		StringTokenizer tokenizer2 = new StringTokenizer(namingURI, ":");
+		if (tokenizer2.countTokens() == 1) {
+			namingURI = namingURI + ":2809";
+		}
+		return namingURI;
+	}
+	
+	static public String getComponentUri(String pathUri) {
+		StringTokenizer tokenizer = new StringTokenizer(pathUri, "/");
+		String namingURI = tokenizer.nextToken();
+		String compURI = pathUri.substring(namingURI.length() + 1);
+		return compURI;
+	}
+	
 	/**
 	 * 
 	 * <div lang="ja"> URI����R���|�[�l���g������
@@ -756,13 +774,8 @@ public class RTSystemBuilder {
 	 */
 	static public RTC.RTObject getComponent(String pathUri) throws Exception {
 		logger.info("getComponent:" + pathUri);
-		StringTokenizer tokenizer = new StringTokenizer(pathUri, "/");
-		String namingURI = tokenizer.nextToken();
-		String compURI = pathUri.substring(namingURI.length() + 1);
-		StringTokenizer tokenizer2 = new StringTokenizer(namingURI, ":");
-		if (tokenizer2.countTokens() == 1) {
-			namingURI = namingURI + ":2809";
-		}
+		String namingURI = RTSystemBuilder.getNamingUri(pathUri);
+		String compURI = RTSystemBuilder.getComponentUri(pathUri);
 
 		// load naming service reference
 		CorbaNaming naming = corbaNamingMap.get(namingURI);

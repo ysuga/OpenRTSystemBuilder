@@ -164,4 +164,17 @@ public class DataPort extends RTSObject {
 		interfaceList.add(new Interface(type_name, instance_name, polarity.value()));
 	}
 
+	/**
+	 * getPlainName
+	 *
+	 * @return
+	 */
+	public String getPlainName() {
+		String name = get(RTS_NAME);
+		String[] names = name.split("\\.", 0);
+		if(names.length >= 2) 
+			return names[1];
+		return name;
+	}
+
 }
