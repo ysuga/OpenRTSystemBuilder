@@ -18,7 +18,10 @@ My goal is to create easy-accessable RTSystemProfile library.
 This also includes NamingService library.
 
 This library encapsulate some complicated process. Please see RTSystemBuilder.java.
+This library also allows you to create RT-component more interactively.
 Compiling JavaDoc also help you a lot!
+
+
 
 h2. Characteristics
 
