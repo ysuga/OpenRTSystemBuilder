@@ -56,7 +56,7 @@ public abstract class RTSProperties extends HashMap<String, String>{
 	 * @param node xml node.
 	 * @throws IOException
 	 */
-	final public void load(Node node) throws IOException{
+	public void load(Node node) throws IOException{
 		NamedNodeMap attribute = node.getAttributes();
 		for(String name: keySet()) {
 			Node attributeNode = attribute.getNamedItem(name);

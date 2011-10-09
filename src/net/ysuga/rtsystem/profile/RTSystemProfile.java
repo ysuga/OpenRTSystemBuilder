@@ -5,10 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,6 +18,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -127,7 +126,12 @@ public class RTSystemProfile extends RTSProperties {
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
 			if (node.getNodeName().equals("rts:Components")) {
-				addComponent(new Component(node));
+				NamedNodeMap attrs = node.getAttributes();
+				if(attrs.getNamedItem("PAIO") != null) {
+					addComponent(new PAIOComponent(node));
+				} else {
+					addComponent(new Component(node));
+				}
 			} else if (node.getNodeName().equals("rts:DataPortConnectors")) {
 				addDataPortConnector(new DataPortConnector(node));
 			} else if (node.getNodeName().equals("rts:ServicePortConnectors")) {
@@ -253,6 +257,56 @@ public class RTSystemProfile extends RTSProperties {
 	 */
 	public void addServicePortConnector(ServicePortConnector connector) {
 		this.servicePortConnectorSet.add(connector);
+	}
+
+	/**
+	 * getOwnedConnectorSet
+	 *
+	 * @param selectedRTSObject
+	 * @return
+	 */
+	public Set<PortConnector> getOwnedConnectorSet(RTSObject selectedRTSObject) {
+		Set<PortConnector> conSet = new HashSet<PortConnector>();
+		String pathUri = selectedRTSObject.get(Component.PATH_URI);
+		
+		for (DataPortConnector con : dataPortConnectorSet) {
+			if (con.getSourceComponentPathUri().equals(pathUri)) {
+				conSet.add(con);
+			}
+			
+			if (con.getTargetComponentPathUri().equals(pathUri)) {
+				conSet.add(con);
+			}
+		}
+		for (ServicePortConnector con : servicePortConnectorSet) {
+			if (con.getSourceComponentPathUri().equals(pathUri)) {
+				conSet.add(con);
+			}
+			
+			if (con.getTargetComponentPathUri().equals(pathUri)) {
+				conSet.add(con);
+			}			
+		}
+		return conSet;
+	}
+
+	/**
+	 * getOwner
+	 *
+	 * @param source
+	 * @return
+	 */
+	public Component getOwner(DataPort source) {
+		for(RTSObject component : this.componentSet) {
+			if(component instanceof Component) {
+				for(DataPort port : ((Component)component).dataPortSet) {
+					if(port == source) {
+						return ((Component)component);
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 }

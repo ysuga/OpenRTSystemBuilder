@@ -14,10 +14,10 @@ import jp.go.aist.rtm.RTC.util.CORBA_SeqUtil;
 import jp.go.aist.rtm.RTC.util.NVUtil;
 import jp.go.aist.rtm.RTC.util.ORBUtil;
 import net.ysuga.rtsystem.profile.Component;
-import net.ysuga.rtsystem.profile.Component.DataPort;
-import net.ysuga.rtsystem.profile.Component.DataPort.Interface;
 import net.ysuga.rtsystem.profile.ConfigurationData;
 import net.ysuga.rtsystem.profile.ConfigurationSet;
+import net.ysuga.rtsystem.profile.DataPort;
+import net.ysuga.rtsystem.profile.DataPort.Interface;
 import net.ysuga.rtsystem.profile.DataPortConnector;
 import net.ysuga.rtsystem.profile.ExecutionContext;
 import net.ysuga.rtsystem.profile.Location;
@@ -373,6 +373,11 @@ public class RTSystemBuilder {
 				+ connector.getTargetComponentInstanceName()
 				+ connector.getTargetPortName());
 
+		if(connector instanceof DataPortConnector) {
+			connect((DataPortConnector)connector);
+			return;
+		}
+		
 		RTObject sourceRTObject = getComponent(connector
 				.getSourceComponentPathUri());
 		RTObject targetRTObject = getComponent(connector
@@ -544,7 +549,7 @@ public class RTSystemBuilder {
 			 * if(nv.name.equals("dataport.data_type")) { dataType =
 			 * nv.value.extract_wstring(); } }
 			 */
-			Component.DataPort dataPort = component.new DataPort(name);
+			DataPort dataPort = new DataPort(name);
 			component.dataPortSet.add(dataPort);
 		}
 
@@ -568,9 +573,16 @@ public class RTSystemBuilder {
 				.get_owned_contexts();
 		for (int i = 0; i < executionContexts.length; i++) {
 			RTC.ExecutionContext executionContext = executionContexts[i];
+			String kindText = null;
+			if(executionContext.get_kind().equals(executionContext.get_kind().PERIODIC)) {
+				kindText = "PERIODIC";
+			} else if(executionContext.get_kind().equals(executionContext.get_kind().EVENT_DRIVEN)) {
+				kindText = "EVENT_DRIVEN";
+			} else {
+				kindText = "OTHER";
+			}
 			ExecutionContext myEc = new ExecutionContext(Integer.toString(i),
-					"rtsExt:execution_context_ext", executionContext.get_kind()
-							.toString(), Double.toString(executionContext
+					"rtsExt:execution_context_ext", kindText, Double.toString(executionContext
 							.get_rate()));
 			component.executionContextSet.add(myEc);
 		}
@@ -805,23 +817,25 @@ public class RTSystemBuilder {
 			component.setState(RTSProperties.ONLINE_ERROR);
 		}
 
-		for (Component.DataPort dataPort : (Set<Component.DataPort>) component.dataPortSet) {
-			if (dataPort.getDirection() == Component.DataPort.DIRECTION_UNKNOWN) {
+		for (DataPort dataPort : (Set<DataPort>) component.dataPortSet) {
+			if (dataPort.getDirection() == DataPort.DIRECTION_UNKNOWN) {
 				PortService[] portServices = rtObject.get_ports();
 				for (int i = 0; i < portServices.length; i++) {
 					if (portServices[i].get_port_profile().name.equals(dataPort
-							.get(Component.DataPort.RTS_NAME))) {
+							.get(DataPort.RTS_NAME))) {
 						for (NameValue profile : portServices[i]
 								.get_port_profile().properties) {
 							if (profile.name.equals("port.port_type")) {
 								String port_type = profile.value
 										.extract_string();
 								if (port_type.equals("DataInPort")) {
-									dataPort.setDirection(Component.DataPort.DIRECTION_IN);
+									dataPort.setDirection(DataPort.DIRECTION_IN);
+									dataPort.setDataType(RTSystemBuilder.getDataType(component, dataPort));
 								} else if (port_type.equals("DataOutPort")) {
-									dataPort.setDirection(Component.DataPort.DIRECTION_OUT);
+									dataPort.setDirection(DataPort.DIRECTION_OUT);
+									dataPort.setDataType(RTSystemBuilder.getDataType(component, dataPort));
 								} else if (port_type.equals("CorbaPort")) {
-									dataPort.setDirection(Component.DataPort.SERVICE_PORT);
+									dataPort.setDirection(DataPort.SERVICE_PORT);
 								}
 							}
 						}
@@ -1031,7 +1045,11 @@ public class RTSystemBuilder {
 	}
 
 	static public String getDataType(Component component,
-			Component.DataPort dataPort) throws Exception {
+			DataPort dataPort) throws Exception {
+		if(dataPort.getDataType() != null) {
+			return dataPort.getDataType();
+		}
+		
 		RTObject rtObject = RTSystemBuilder.getComponent(component);
 		PortService port = getPortService(component,
 				dataPort.get(DataPort.RTS_NAME));
@@ -1046,7 +1064,7 @@ public class RTSystemBuilder {
 	}
 
 	static public boolean isProvider(Component component,
-			Component.DataPort dataPort) throws Exception {
+			DataPort dataPort) throws Exception {
 		PortService port = getPortService(component,
 				dataPort.get(DataPort.RTS_NAME));
 		if (port != null) {
@@ -1059,7 +1077,7 @@ public class RTSystemBuilder {
 	}
 
 	static public boolean isConsumer(Component component,
-			Component.DataPort dataPort) throws Exception {
+			DataPort dataPort) throws Exception {
 		PortService port = getPortService(component,
 				dataPort.get(DataPort.RTS_NAME));
 		if (port != null) {
@@ -1071,9 +1089,15 @@ public class RTSystemBuilder {
 		return false;
 	}
 
-	static public List<String> getInterfaceName(Component component,
-			Component.DataPort dataPort) throws Exception {
-		ArrayList inList = new ArrayList<String>();
+	static public List<String> getInterfaceNameList(Component component,
+			DataPort dataPort) throws Exception {
+		ArrayList<String> inList = new ArrayList<String>();
+		if(dataPort.getInterfaceList() != null) {
+			for(Interface intf : dataPort.getInterfaceList()) {
+				inList.add(intf.getName());
+			}
+			return inList;
+		}
 		PortService port = getPortService(component,
 				dataPort.get(DataPort.RTS_NAME));
 		if (port != null) {
@@ -1085,8 +1109,8 @@ public class RTSystemBuilder {
 	}
 
 	static public boolean isConnectable(Component sourceComponent,
-			Component.DataPort sourceDataPort, Component targetComponent,
-			Component.DataPort targetDataPort) throws Exception {
+			DataPort sourceDataPort, Component targetComponent,
+			DataPort targetDataPort) throws Exception {
 		boolean connectable = false;
 		String dataType = RTSystemBuilder.getDataType(sourceComponent,
 				sourceDataPort);
@@ -1096,10 +1120,10 @@ public class RTSystemBuilder {
 		if (dataType != null && dataType.equals(targetDataType)) {
 			// / if both ports are DataPort and if both ports' DataTypes are
 			// same
-			if ((sourceDataPort.getDirection() == Component.DataPort.DIRECTION_IN && targetDataPort
-					.getDirection() == Component.DataPort.DIRECTION_OUT)
-					|| (sourceDataPort.getDirection() == Component.DataPort.DIRECTION_OUT && targetDataPort
-							.getDirection() == Component.DataPort.DIRECTION_IN)) {
+			if ((sourceDataPort.getDirection() == DataPort.DIRECTION_IN && targetDataPort
+					.getDirection() == DataPort.DIRECTION_OUT)
+					|| (sourceDataPort.getDirection() == DataPort.DIRECTION_OUT && targetDataPort
+							.getDirection() == DataPort.DIRECTION_IN)) {
 				connectable = true; // Valid DataPort Connection.
 
 			}
@@ -1108,9 +1132,9 @@ public class RTSystemBuilder {
 					.getConnectionServiceInterfaceName(sourceComponent,
 							sourceDataPort, targetComponent, targetDataPort);
 			if (interfaceName != null) {
-				Component.DataPort.Interface sourceInterface = sourceDataPort
+				DataPort.Interface sourceInterface = sourceDataPort
 						.getInterfaceByName(interfaceName);
-				Component.DataPort.Interface targetInterface = targetDataPort
+				DataPort.Interface targetInterface = targetDataPort
 						.getInterfaceByName(interfaceName);
 				if ((sourceInterface.getPolarity() == Interface.POLARITY_CONSUMER && targetInterface
 						.getPolarity() == Interface.POLARITY_PROVIDER)
@@ -1125,13 +1149,13 @@ public class RTSystemBuilder {
 	}
 
 	public static String getConnectionServiceInterfaceName(
-			Component sourceComponent, Component.DataPort sourceDataPort,
-			Component targetComponent, Component.DataPort targetDataPort)
+			Component sourceComponent, DataPort sourceDataPort,
+			Component targetComponent, DataPort targetDataPort)
 			throws Exception {
 		List<String> sourceInterfaceNameList = RTSystemBuilder
-				.getInterfaceName(sourceComponent, sourceDataPort);
+				.getInterfaceNameList(sourceComponent, sourceDataPort);
 		List<String> targetInterfaceNameList = RTSystemBuilder
-				.getInterfaceName(targetComponent, targetDataPort);
+				.getInterfaceNameList(targetComponent, targetDataPort);
 		for (String interfaceName : sourceInterfaceNameList) {
 			for (String targetInterfaceName : targetInterfaceNameList) {
 				if (interfaceName != null
