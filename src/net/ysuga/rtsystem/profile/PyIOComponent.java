@@ -21,8 +21,38 @@ import org.w3c.dom.Node;
  * @author ysuga
  * 
  */
-public class PAIOComponent extends Component {
+public class PyIOComponent extends RTComponent {
 
+	/**
+	 * 
+	 */
+	private static final String ON_DEACTIVATED_DEFAULT_CODE = "def onDeactivated(self, ec_id):\n" +
+			"\t#Here You can add your own cleanup code.\n" +
+			"\t\n" +
+			"\treturn RTC.RTC_OK\n";
+
+	/**
+	 * 
+	 */
+	private static final String ON_ACTIVATED_DEFAULT_CODE = "def onActivated(self, ec_id):\n" +
+			"\t#Here You can add your own initialization code.\n" +
+			"\t\n" +
+			"\treturn RTC.RTC_OK\n";
+
+	/**
+	 * 
+	 */
+	private static final String ON_EXECUTE_DEFAULT_CODE = "def onExecute(self, ec_id):\n" +
+			"\t#Here you can add your routine.\n" +
+			"\t#This function is automatically called Periodically.\n" +
+			"\t\n"+
+			"\treturn RTC.RTC_OK\n";
+
+	/**
+	 * 
+	 */
+	public static final String PYIO = "PyIO";
+	
 	private String namingContext;
 	private String onExecuteCode;
 	private String onActivatedCode;
@@ -33,10 +63,11 @@ public class PAIOComponent extends Component {
 	 * 
 	 * @throws IOException
 	 */
-	public PAIOComponent() throws IOException {
+	public PyIOComponent() throws IOException {
 		super();
-		onExecuteCode = "def onExecute(self, ec_id)\n\t\n\tpass\n";
-		onActivatedCode = "def onActivated(self, ec_id)\n\t\n\tpass\n";
+		onExecuteCode = ON_EXECUTE_DEFAULT_CODE;
+		onActivatedCode = ON_ACTIVATED_DEFAULT_CODE;
+		onDeactivatedCode = ON_DEACTIVATED_DEFAULT_CODE;
 	}
 
 	/**
@@ -50,13 +81,13 @@ public class PAIOComponent extends Component {
 	 * @param compositeType
 	 * @throws IOException
 	 */
-	public PAIOComponent(String instanceName, String pathUri, String Id)
+	public PyIOComponent(String instanceName, String pathUri, String Id)
 			throws IOException {
 		super(instanceName, pathUri, Id, "default", true, "None");
-		this.put("PAIO", "true");
-		onExecuteCode = "def onExecute(self, ec_id)\n\t\n\tpass\n";
-		onActivatedCode = "def onActivated(self, ec_id)\n\t\n\tpass\n";
-		onDeactivatedCode = "def onDeactivated(self, ec_id)\n\t\n\tpass\n";
+		this.put(PYIO, "true");
+		onExecuteCode = ON_EXECUTE_DEFAULT_CODE;
+		onActivatedCode = ON_ACTIVATED_DEFAULT_CODE;
+		onDeactivatedCode = ON_DEACTIVATED_DEFAULT_CODE;
 
 	}
 
@@ -66,10 +97,11 @@ public class PAIOComponent extends Component {
 	 * @param node
 	 * @throws IOException
 	 */
-	public PAIOComponent(Node node) throws IOException {
+	public PyIOComponent(Node node) throws IOException {
 		super(node);
-		onExecuteCode = "def onExecute(self, ec_id)\n\t\n\tpass\n";
-		onActivatedCode = "def onActivated(self, ec_id)\n\t\n\tpass\n";
+		onExecuteCode = ON_EXECUTE_DEFAULT_CODE;
+		onActivatedCode = ON_ACTIVATED_DEFAULT_CODE;
+		onDeactivatedCode = ON_DEACTIVATED_DEFAULT_CODE;
 	}
 
 	/**
@@ -93,7 +125,7 @@ public class PAIOComponent extends Component {
 	 * @return
 	 */
 	public String getModuleName() {
-		String Id = get(Component.ID);
+		String Id = get(RTComponent.ID);
 		StringTokenizer tokens = new StringTokenizer(Id, ":");
 		String RTC = tokens.nextToken();
 		String vendor = tokens.nextToken();
@@ -109,7 +141,7 @@ public class PAIOComponent extends Component {
 	 * @return
 	 */
 	public String getNameServer() {
-		String pathUri = get(Component.PATH_URI);
+		String pathUri = get(RTComponent.PATH_URI);
 		return RTSystemBuilder.getNamingUri(pathUri);
 	}
 
@@ -119,7 +151,7 @@ public class PAIOComponent extends Component {
 	 * @return
 	 */
 	public String getCategory() {
-		String Id = get(Component.ID);
+		String Id = get(RTComponent.ID);
 		StringTokenizer tokens = new StringTokenizer(Id, ":");
 		String RTC = tokens.nextToken();
 		String vendor = tokens.nextToken();
@@ -150,7 +182,7 @@ public class PAIOComponent extends Component {
 	 * @return
 	 */
 	public String getVersion() {
-		String Id = get(Component.ID);
+		String Id = get(RTComponent.ID);
 		StringTokenizer tokens = new StringTokenizer(Id, ":");
 		String RTC = tokens.nextToken();
 		String vendor = tokens.nextToken();
@@ -166,7 +198,7 @@ public class PAIOComponent extends Component {
 	 * @return
 	 */
 	public String getVendor() {
-		String Id = get(Component.ID);
+		String Id = get(RTComponent.ID);
 		StringTokenizer tokens = new StringTokenizer(Id, ":");
 		String RTC = tokens.nextToken();
 		String vendor = tokens.nextToken();
@@ -217,5 +249,56 @@ public class PAIOComponent extends Component {
 	public final void setOnDeactivatedCode(String onDectivatedCode) {
 		this.onDeactivatedCode = onDectivatedCode;
 	}
+
+	private PythonRTCLauncher launcher;
+	/**
+	 * setLauncher
+	 *
+	 * @param launcher
+	 */
+	public void setLauncher(PythonRTCLauncher launcher) {
+		this.launcher = launcher;
+	}
+	
+	public PythonRTCLauncher getLauncher() {
+		return launcher;
+	}
+
+	public boolean isLaunched() {
+		if(launcher != null) {
+			return true;
+		}
+		return false;
+	}
+	
+	String periodicRate;
+	/**
+	 * setPeriodicRate
+	 *
+	 * @param text
+	 */
+	public void setPeriodicRate(String text) {
+		this.periodicRate = text;
+	}
+	
+	public String getPeriodicRate() {
+		return periodicRate;
+	}
+
+	private String nameServers;
+	/**
+	 * getNameServers
+	 *
+	 * @return
+	 */
+	public String getNameServers() {
+		// TODO 自動生成されたメソッド・スタブ
+		return nameServers;
+	}
+	
+	public void setNameServers(String nameServers) {
+		this.nameServers = nameServers;
+	}
+	
 
 }

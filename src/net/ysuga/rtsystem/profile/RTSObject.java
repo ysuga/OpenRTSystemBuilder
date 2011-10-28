@@ -67,4 +67,11 @@ public abstract class RTSObject extends RTSProperties {
 		element.appendChild(location.getElement("rtsExt:Location", document));
 		return element;
 	}
+
+	/**
+	 * downwardSynchronize
+	 * @throws Exception 
+	 *
+	 */
+	abstract public void downwardSynchronize() throws Exception;
 }

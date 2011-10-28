@@ -41,7 +41,7 @@ public class RTNamingContext extends ArrayList<RTNamingContext> {
 	}
 	/**
 	 * <div lang="ja">
-	 * ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	 * ï¿½Rï¿½ï¿½ï¿½Xï¿½gï¿½ï¿½ï¿½Nï¿½^
 	 * </div>
 	 * <div lang="en">
 	 * Constructor
@@ -55,7 +55,7 @@ public class RTNamingContext extends ArrayList<RTNamingContext> {
 	
 	/**
 	 * <div lang="ja">
-	 * ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	 * ï¿½Rï¿½ï¿½ï¿½Xï¿½gï¿½ï¿½ï¿½Nï¿½^
 	 * </div>
 	 * <div lang="en">
 	 * Constructor
@@ -101,5 +101,23 @@ public class RTNamingContext extends ArrayList<RTNamingContext> {
 	}
 	
 	
+	/**
+	 * 
+	 * Get Full Path Name of RT-Naming Context object.
+	 *
+	 * @return full path string of rt naming context.
+	 */
+	final public String getFullPath() {
+		StringBuilder strbuf = new StringBuilder();
+		RTNamingContext parentCxt = this.getParentContext();
+		if(parentCxt != null) {
+			strbuf.append(parentCxt.getFullPath());
+			strbuf.append("/");
+			strbuf.append(getName());
+		} else {
+			strbuf.append(getName());
+		}
+		return strbuf.toString();
+	}
 
 }

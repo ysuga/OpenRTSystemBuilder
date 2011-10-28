@@ -8,11 +8,10 @@
 package net.ysuga.rtsystem.profile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+import net.ysuga.rtsbuilder.RTCCondition;
 import net.ysuga.rtsbuilder.RTSystemBuilder;
 
 import org.w3c.dom.Document;
@@ -20,14 +19,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import RTC.PortInterfacePolarity;
-
 /**
  * Component
  * @author ysuga
  *
  */
-public class Component extends RTSObject {
+public class RTComponent extends RTSObject {
 
 	
 	/**
@@ -82,7 +79,7 @@ public class Component extends RTSObject {
 	
 	
 
-	public Component() throws IOException {
+	public RTComponent() throws IOException {
 		this("defaultInstanceName", "defaultPathUri",
 				"defaultId", "default", 
 				true, "None");		
@@ -92,7 +89,7 @@ public class Component extends RTSObject {
 	 * Constructor
 	 * @throws IOException
 	 */
-	public Component(String instanceName, String pathUri, 
+	public RTComponent(String instanceName, String pathUri, 
 			String Id, String activeConfigurationSet, 
 			boolean required, String compositeType) throws IOException {
 		super();
@@ -115,7 +112,7 @@ public class Component extends RTSObject {
 	 * @param node
 	 * @throws IOException
 	 */
-	public Component(Node node) throws IOException {
+	public RTComponent(Node node) throws IOException {
 		this("defaultInstanceName", "defaultPathUri",
 				"defaultId", "default", 
 				true, "None");
@@ -176,6 +173,28 @@ public class Component extends RTSObject {
 	
 	public void configure() throws Exception {
 		RTSystemBuilder.configureComponent(this);
+	}
+	
+	public void downwardSynchronize() throws Exception {
+		RTSystemBuilder.downwardSynchronization(this);
+	}
+
+	RTCCondition condition = RTCCondition.NONE;
+	
+	public RTCCondition getCondition() {
+		int state = this.getState();
+		switch(state) {
+		case RTSProperties.ONLINE_ACTIVE: 
+			return RTCCondition.ACTIVE;
+		case RTSProperties.ONLINE_INACTIVE:
+			return RTCCondition.INACTIVE;
+		case RTSProperties.ONLINE_ERROR:
+			return RTCCondition.ERROR;
+		case RTSProperties.ONLINE_CREATED:
+			return RTCCondition.CREATED;
+		default:
+			return RTCCondition.NONE;
+		}
 	}
 	
 }

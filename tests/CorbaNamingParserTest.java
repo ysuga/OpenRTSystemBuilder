@@ -3,7 +3,7 @@ import java.io.File;
 import java.util.Set;
 
 import net.ysuga.corbanaming.CorbaNamingParser;
-import net.ysuga.rtsystem.profile.Component;
+import net.ysuga.rtsystem.profile.RTComponent;
 import net.ysuga.rtsystem.profile.DataPortConnector;
 import net.ysuga.rtsystem.profile.RTSystemProfile;
 
@@ -31,7 +31,7 @@ public class CorbaNamingParserTest {
 			Set<String> set = CorbaNamingParser.getRTObjectPathUriSet("127.0.0.1");
 			System.out.println("Set = " + set);
 			
-			Set<Component> cset = CorbaNamingParser.getRegisteredComponentSet("127.0.0.1");
+			Set<RTComponent> cset = CorbaNamingParser.getRegisteredComponentSet("127.0.0.1");
 			System.out.println("Comp = " + cset);
 			
 			Set<DataPortConnector> conset = CorbaNamingParser.getConnectorSet(cset);

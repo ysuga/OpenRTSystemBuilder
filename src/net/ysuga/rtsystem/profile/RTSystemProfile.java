@@ -4,9 +4,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,6 +22,9 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
+
+import net.ysuga.corbanaming.RTNamingContext;
+import net.ysuga.rtsbuilder.RTSystemBuilder;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -46,7 +56,7 @@ public class RTSystemProfile extends RTSProperties {
 		return fileName;
 	}
 
-	public Set<Component> componentSet;
+	public Set<RTComponent> componentSet;
 
 	public Set<DataPortConnector> dataPortConnectorSet;
 
@@ -61,7 +71,14 @@ public class RTSystemProfile extends RTSProperties {
 		return buf.toString();
 	}
 
+	private String name;
+
+	public String getName() {
+		return name;
+	}
+
 	public RTSystemProfile(String systemName, String vendorName, String version) {
+		name = systemName;
 		put("xmlns:rtsExt", "http://www.openrtp.org/namespaces/rts_ext");
 		put("xmlns:rts", "http://www.openrtp.org/namespaces/rts");
 		put("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -70,9 +87,11 @@ public class RTSystemProfile extends RTSProperties {
 		put("rts:creationDate", formatCalendar(current));
 		put(VERSION, "0.2");
 		put(ID, "RTSystem:" + vendorName + ":" + systemName + ":" + version);
-		componentSet = new HashSet<Component>();
+		componentSet = new HashSet<RTComponent>();
 		dataPortConnectorSet = new HashSet<DataPortConnector>();
 		servicePortConnectorSet = new HashSet<ServicePortConnector>();
+
+		executor = Executors.newFixedThreadPool(16);
 	}
 
 	@Override
@@ -127,10 +146,10 @@ public class RTSystemProfile extends RTSProperties {
 			Node node = nodeList.item(i);
 			if (node.getNodeName().equals("rts:Components")) {
 				NamedNodeMap attrs = node.getAttributes();
-				if(attrs.getNamedItem("PAIO") != null) {
-					addComponent(new PAIOComponent(node));
+				if (attrs.getNamedItem("PAIO") != null) {
+					addComponent(new PyIOComponent(node));
 				} else {
-					addComponent(new Component(node));
+					addComponent(new RTComponent(node));
 				}
 			} else if (node.getNodeName().equals("rts:DataPortConnectors")) {
 				addDataPortConnector(new DataPortConnector(node));
@@ -197,7 +216,7 @@ public class RTSystemProfile extends RTSProperties {
 	 * 
 	 * @param component
 	 */
-	public void addComponent(Component component) {
+	public void addComponent(RTComponent component) {
 		componentSet.add(component);
 	}
 
@@ -210,26 +229,46 @@ public class RTSystemProfile extends RTSProperties {
 	}
 
 	public void removeComponent(RTSProperties component) {
-		componentSet.remove(component.get("rts:instanceName"));
-
+		componentSet.remove(component);
+		for(PortConnector pc:getPortConnectors()) {
+			if(pc.getSourceComponentPathUri().equals(component.get(RTComponent.PATH_URI))) {
+				removePortConnector(pc);
+			}
+			if(pc.getTargetComponentPathUri().equals(component.get(RTComponent.PATH_URI))) {
+				removePortConnector(pc);
+			}
+		}
 	}
 
 	public void removeDataPortConnector(PortConnector connector) {
-		dataPortConnectorSet.remove(connector.get("rts:name"));
+		dataPortConnectorSet.remove(connector);
 	}
 
 	public void removeServicePortConnector(PortConnector connector) {
-		servicePortConnectorSet.remove(connector.get("rts:name"));
+		servicePortConnectorSet.remove(connector);
 	}
 
+	public void removePortConnector(PortConnector connector) {
+		dataPortConnectorSet.remove(connector);
+		servicePortConnectorSet.remove(connector);
+	}
 	/**
 	 * 
 	 * @param name
 	 * @return
 	 */
-	final public RTSProperties getComponent(String name) {
+	final public RTSProperties getComponentByInstanceName(String name) {
 		for (RTSProperties component : componentSet) {
-			if (component.get(Component.INSTANCE_NAME).equals(name)) {
+			if (component.get(RTComponent.INSTANCE_NAME).equals(name)) {
+				return component;
+			}
+		}
+		return null;
+	}
+
+	final public RTSProperties getComponentByFullPath(String pathUri) {
+		for (RTSProperties component : componentSet) {
+			if (component.get(RTComponent.PATH_URI).equals(pathUri)) {
 				return component;
 			}
 		}
@@ -261,19 +300,19 @@ public class RTSystemProfile extends RTSProperties {
 
 	/**
 	 * getOwnedConnectorSet
-	 *
+	 * 
 	 * @param selectedRTSObject
 	 * @return
 	 */
 	public Set<PortConnector> getOwnedConnectorSet(RTSObject selectedRTSObject) {
 		Set<PortConnector> conSet = new HashSet<PortConnector>();
-		String pathUri = selectedRTSObject.get(Component.PATH_URI);
-		
+		String pathUri = selectedRTSObject.get(RTComponent.PATH_URI);
+
 		for (DataPortConnector con : dataPortConnectorSet) {
 			if (con.getSourceComponentPathUri().equals(pathUri)) {
 				conSet.add(con);
 			}
-			
+
 			if (con.getTargetComponentPathUri().equals(pathUri)) {
 				conSet.add(con);
 			}
@@ -282,26 +321,26 @@ public class RTSystemProfile extends RTSProperties {
 			if (con.getSourceComponentPathUri().equals(pathUri)) {
 				conSet.add(con);
 			}
-			
+
 			if (con.getTargetComponentPathUri().equals(pathUri)) {
 				conSet.add(con);
-			}			
+			}
 		}
 		return conSet;
 	}
 
 	/**
 	 * getOwner
-	 *
+	 * 
 	 * @param source
 	 * @return
 	 */
-	public Component getOwner(DataPort source) {
-		for(RTSObject component : this.componentSet) {
-			if(component instanceof Component) {
-				for(DataPort port : ((Component)component).dataPortSet) {
-					if(port == source) {
-						return ((Component)component);
+	public RTComponent getOwner(DataPort source) {
+		for (RTSObject component : this.componentSet) {
+			if (component instanceof RTComponent) {
+				for (DataPort port : ((RTComponent) component).dataPortSet) {
+					if (port == source) {
+						return ((RTComponent) component);
 					}
 				}
 			}
@@ -309,4 +348,141 @@ public class RTSystemProfile extends RTSProperties {
 		return null;
 	}
 
+
+	class AsynchAddThread implements Callable<Integer> {
+		private String fullpath;
+
+		public AsynchAddThread(String fullpath) {
+			this.fullpath = fullpath;
+		}
+
+		public Integer call() {
+			RTComponent comp;
+			try {
+				comp = RTSystemBuilder.createComponent(fullpath);
+				if (comp != null) {
+					addComponent(comp);
+				}
+				return new Integer(0);
+			} catch (Exception e) {
+				// TODO 自動生成された catch ブロック
+				return new Integer(-1);
+			}
+		}
+	};
+
+	private ExecutorService executor;
+	private ArrayList<Future<Integer>> futureList;
+
+	public void addComponentAsynch(String fullpath) {
+		futureList.add(executor.submit(new AsynchAddThread(fullpath)));
+	}
+
+	public void asynchAddJoin() {
+		for (Future<Integer> t : futureList) {
+			try {
+				t.get();
+			} catch (ExecutionException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Add All Components included in NamingContext.
+	 * 
+	 * @param nc
+	 *            NamingContext of a Name Service.
+	 * @throws Exception
+	 */
+	public synchronized void addAllComponent(RTNamingContext nc) throws Exception {
+		Exception ebuf = null;
+		boolean startFlag = false;
+		if (futureList == null) {
+			futureList = new ArrayList<Future<Integer>>();
+			startFlag = true;
+		}
+		for (RTNamingContext rtnc : nc) {
+			if (rtnc.getKind().equals("rtc")) {
+				String fullpath = rtnc.getFullPath();
+				if (this.getComponentByFullPath(fullpath) == null) {
+					try {
+						this.addComponentAsynch(fullpath);
+					} catch (Exception e) {
+						// TODO 自動生成された catch ブロック
+						e.printStackTrace();
+						ebuf = e;
+					}
+				}
+			} else {
+				try {
+
+					addAllComponent(rtnc);
+				} catch (Exception e) {
+					ebuf = e;
+				}
+			}
+		}
+		if (startFlag) {
+			asynchAddJoin();
+			futureList = null;
+		}
+		if (ebuf != null) {
+			throw ebuf;
+		}
+	}
+
+	/**
+	 * getConnectorByName
+	 *
+	 * @param name
+	 * @return
+	 */
+	public PortConnector getConnectorByName(String name) {
+		for(DataPortConnector dpc:this.dataPortConnectorSet) {
+			if(dpc.get(PortConnector.NAME).equals(name)) {
+				return dpc;
+			}
+		}
+		for(ServicePortConnector spc:this.servicePortConnectorSet) {
+			if(spc.get(PortConnector.NAME).equals(name)) {
+				return spc;
+			}
+		}
+		return null;
+	}
+
+	public void addPortConnector(PortConnector pc) {
+		if (pc instanceof ServicePortConnector) {
+			addServicePortConnector((ServicePortConnector) pc);
+		} else {
+			addDataPortConnector((DataPortConnector) pc);
+		}
+	}
+
+	/**
+	 * getPortConnectorSet
+	 *
+	 * @return
+	 */
+	public PortConnector[] getPortConnectors(){
+		PortConnector[] pcs = new PortConnector[dataPortConnectorSet.size() + servicePortConnectorSet.size()];
+		int counter = 0;
+		Iterator<DataPortConnector> i = dataPortConnectorSet.iterator();
+		while(i.hasNext()) {
+			pcs[counter] = (PortConnector)i.next();
+			counter++;
+		}
+		Iterator<ServicePortConnector> si = servicePortConnectorSet.iterator();
+		while(si.hasNext()) {
+			pcs[counter] = (PortConnector)si.next();
+			counter++;
+		}
+		return pcs;
+	}
+	
 }

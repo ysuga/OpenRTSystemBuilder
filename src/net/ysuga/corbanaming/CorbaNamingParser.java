@@ -15,7 +15,7 @@ import java.util.StringTokenizer;
 import jp.go.aist.rtm.RTC.CorbaNaming;
 import jp.go.aist.rtm.RTC.util.ORBUtil;
 import net.ysuga.rtsbuilder.RTSystemBuilder;
-import net.ysuga.rtsystem.profile.Component;
+import net.ysuga.rtsystem.profile.RTComponent;
 import net.ysuga.rtsystem.profile.DataPortConnector;
 
 import org.omg.CosNaming.Binding;
@@ -23,6 +23,9 @@ import org.omg.CosNaming.BindingIteratorHolder;
 import org.omg.CosNaming.BindingListHolder;
 import org.omg.CosNaming.BindingType;
 import org.omg.CosNaming.NamingContext;
+import org.omg.CosNaming.NamingContextPackage.CannotProceed;
+import org.omg.CosNaming.NamingContextPackage.InvalidName;
+import org.omg.CosNaming.NamingContextPackage.NotFound;
 
 import RTC.RTObject;
 
@@ -105,9 +108,9 @@ public class CorbaNamingParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Set<Component> getRegisteredComponentSet(String hostAddress)
+	public static Set<RTComponent> getRegisteredComponentSet(String hostAddress)
 			throws Exception {
-		Set<Component> componentSet = new HashSet<Component>();
+		Set<RTComponent> componentSet = new HashSet<RTComponent>();
 		Set<String> componentUriSet = getRTObjectPathUriSet(hostAddress);
 
 		String namingUri = hostAddress;
@@ -117,7 +120,7 @@ public class CorbaNamingParser {
 		}
 
 		for (String uri : componentUriSet) {
-			Component component = RTSystemBuilder.createComponent(uri);
+			RTComponent component = RTSystemBuilder.createComponent(uri);
 			if (component != null) {
 				componentSet.add(component);
 			}
@@ -133,11 +136,11 @@ public class CorbaNamingParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Set<DataPortConnector> getConnectorSet(Set<Component> componentSet)
+	public static Set<DataPortConnector> getConnectorSet(Set<RTComponent> componentSet)
 			throws Exception {
 		Set<DataPortConnector> connectorSet = new HashSet<DataPortConnector>();
 
-		for (Component component : componentSet) {
+		for (RTComponent component : componentSet) {
 			RTObject sourceRTObject = RTSystemBuilder.getComponent(component);
 
 			RTC.PortService[] portServices = sourceRTObject.get_ports();
@@ -205,25 +208,25 @@ public class CorbaNamingParser {
 	 * 
 	 * @param nameServerUri
 	 * @return
+	 * @throws Exception 
+	 * @throws InvalidName 
+	 * @throws CannotProceed 
+	 * @throws NotFound 
+	 * @throws CorbaNamingCannotFindException 
+	 * @throws CorbaNamingInvalidContextException 
 	 * @throws CorbaNamingConnectionException
 	 *             </div>
 	 */
 	public static RTNamingContext buildRTNamingContext(String nameServerUri)
-			throws CorbaNamingConnectionException {
+			throws CorbaNamingCannotFindException, CorbaNamingInvalidContextException {
 		RTNamingContext rootContext = new RTNamingContext(nameServerUri);
 
 		StringTokenizer tokenizer2 = new StringTokenizer(nameServerUri, ":");
 		if (tokenizer2.countTokens() == 1) {
 			nameServerUri = nameServerUri + ":2809";
 		}
-		CorbaNaming corbaNaming;
-		try {
-			corbaNaming = new CorbaNaming(ORBUtil.getOrb(), nameServerUri);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new CorbaNamingConnectionException();
-		}
-
+		CorbaNaming corbaNaming = CorbaNamingManager.get(nameServerUri);
+		
 		NamingContext namingContext = corbaNaming.getRootContext();
 		BindingListHolder bl = new BindingListHolder();
 		BindingIteratorHolder bi = new BindingIteratorHolder();
@@ -240,9 +243,8 @@ public class CorbaNamingParser {
 							binding.binding_name[0].id,
 							binding.binding_name[0].kind));
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new CorbaNamingConnectionException();
+			} catch (Exception e)  {
+				throw new CorbaNamingInvalidContextException();
 			}
 		}
 

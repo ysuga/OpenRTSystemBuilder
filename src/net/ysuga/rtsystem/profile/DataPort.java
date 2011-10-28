@@ -177,4 +177,14 @@ public class DataPort extends RTSObject {
 		return name;
 	}
 
+	/**
+	 * downwardSynchronize
+	 * @throws Exception
+	 */
+	@Override
+	public void downwardSynchronize() throws Exception {
+		// TODO 自動生成されたメソッド・スタブ
+		
+	}
+
 }
