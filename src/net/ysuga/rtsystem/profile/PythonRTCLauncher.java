@@ -56,7 +56,7 @@ public class PythonRTCLauncher implements Runnable {
 	
 	public void execute() {
 		List<String> arg = new ArrayList<String>();
-		arg.add("C:/Python26/python");
+		arg.add("python");
 		arg.add("-u");
 		arg.add(pythonFile.getAbsolutePath());
 		processBuilder = new ProcessBuilder(arg);
