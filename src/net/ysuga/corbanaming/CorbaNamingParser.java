@@ -15,8 +15,8 @@ import java.util.StringTokenizer;
 import jp.go.aist.rtm.RTC.CorbaNaming;
 import jp.go.aist.rtm.RTC.util.ORBUtil;
 import net.ysuga.rtsbuilder.RTSystemBuilder;
-import net.ysuga.rtsystem.profile.RTComponent;
 import net.ysuga.rtsystem.profile.DataPortConnector;
+import net.ysuga.rtsystem.profile.RTComponent;
 
 import org.omg.CosNaming.Binding;
 import org.omg.CosNaming.BindingIteratorHolder;

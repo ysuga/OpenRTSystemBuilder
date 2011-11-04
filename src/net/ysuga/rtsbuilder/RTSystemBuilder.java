@@ -1384,4 +1384,29 @@ public class RTSystemBuilder {
 
 		return null;
 	}
+
+	/**
+	 * getComponentConditionFromPath
+	 *
+	 * @param pathUri
+	 * @return
+	 * @throws CorbaNamingResolveException 
+	 * @throws CorbaNamingCannotFindException 
+	 */
+	public static RTCCondition getComponentConditionFromPath(String pathUri) throws CorbaNamingCannotFindException, CorbaNamingResolveException {
+		return getComponentCondition(pathUri);
+	}
+
+	/**
+	 * getComponentConditionFromRecord
+	 *
+	 * @param component
+	 * @return
+	 * @throws CorbaNamingResolveException 
+	 * @throws CorbaNamingCannotFindException 
+	 */
+	public static RTCCondition getComponentConditionFromRecord(
+			RTSObject component) throws CorbaNamingCannotFindException, CorbaNamingResolveException {
+		return getComponentCondition(component);
+	}
 }
