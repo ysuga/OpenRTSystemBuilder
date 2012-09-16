@@ -302,6 +302,8 @@ public class RTSystemBuilder {
 		prof.ports = new PortService[2];
 
 		for (PortService portService : sourceRTObject.get_ports()) {
+			String n = portService.get_port_profile().name;
+			System.out.println(n);
 			if (portService.get_port_profile().name.equals(connector
 					.getSourcePortName())) {
 				prof.ports[1] = portService;

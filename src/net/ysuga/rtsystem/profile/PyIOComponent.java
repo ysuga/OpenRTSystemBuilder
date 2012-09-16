@@ -23,30 +23,32 @@ import org.w3c.dom.Node;
  */
 public class PyIOComponent extends RTComponent {
 
+	public static String indent = "  ";
+
 	/**
 	 * 
 	 */
 	private static final String ON_DEACTIVATED_DEFAULT_CODE = "def onDeactivated(self, ec_id):\n" +
-			"\t#Here You can add your own cleanup code.\n" +
-			"\t\n" +
-			"\treturn RTC.RTC_OK\n";
+			indent + "#Here You can add your own cleanup code.\n" +
+			indent + "\n" +
+			indent + "return RTC.RTC_OK\n";
 
 	/**
 	 * 
 	 */
 	private static final String ON_ACTIVATED_DEFAULT_CODE = "def onActivated(self, ec_id):\n" +
-			"\t#Here You can add your own initialization code.\n" +
-			"\t\n" +
-			"\treturn RTC.RTC_OK\n";
+			indent + "#Here You can add your own initialization code.\n" +
+			indent + "\n" +
+			indent + "return RTC.RTC_OK\n";
 
 	/**
 	 * 
 	 */
 	private static final String ON_EXECUTE_DEFAULT_CODE = "def onExecute(self, ec_id):\n" +
-			"\t#Here you can add your routine.\n" +
-			"\t#This function is automatically called Periodically.\n" +
-			"\t\n"+
-			"\treturn RTC.RTC_OK\n";
+			indent + "#Here you can add your routine.\n" +
+			indent + "#This function is automatically called Periodically.\n" +
+			indent + "\n"+
+			indent + "return RTC.RTC_OK\n";
 
 	/**
 	 * 
